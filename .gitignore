@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+build/
+dist/
+
+# Claude Code session data
+.claude/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Default example.py output (use --out <path> for persistent outputs)
+out.mp4

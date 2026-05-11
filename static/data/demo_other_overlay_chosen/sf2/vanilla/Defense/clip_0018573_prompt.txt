@@ -1,0 +1,1 @@
+NPC: Active_Behavior(Jump In Place: Executes a neutral vertical jump into the air without horizontal movement.; Walk Left: Moves character towards the left side of the screen.), Passive_Behavior(Standing Block: Passively guards against high or mid attacks while standing.), Strategy(Defense: Absorbs and evades incoming pressure, recovering safely instead of trading hits.)

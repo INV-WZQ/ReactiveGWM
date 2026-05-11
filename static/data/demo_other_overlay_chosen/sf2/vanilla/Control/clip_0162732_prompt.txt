@@ -1,0 +1,1 @@
+NPC: Active_Behavior(Walk Left: Moves character towards the left side of the screen.; Sonic Boom: Guile's signature projectile attack thrown horizontally across the screen.), Passive_Behavior(Idle: Stands perfectly still without any input, waiting for an interaction.), Strategy(Control: Manages spacing with projectiles and measured pokes to dictate the pace of engagement.)

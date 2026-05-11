@@ -1,0 +1,1 @@
+NPC: Active_Behavior(Walk Left: Walking horizontally to the left side of the screen.; Walk Right: Walking horizontally to the right side of the screen.), Passive_Behavior(Idle: Stands still without input, waiting for an interaction.), Strategy(Control: Uses range and zoning tools to keep the opponent at a preferred distance and force reactions.)

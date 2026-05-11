@@ -1,0 +1,290 @@
+body {
+  font-family: 'Noto Sans', sans-serif;
+}
+
+
+.footer .icon-link {
+    font-size: 25px;
+    color: #000;
+}
+
+.link-block a {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.dnerf {
+  font-variant: small-caps;
+}
+
+
+.teaser .hero-body {
+  padding-top: 0;
+  padding-bottom: 3rem;
+}
+
+.teaser {
+  font-family: 'Google Sans', sans-serif;
+}
+
+
+.publication-title {
+}
+
+.publication-banner {
+  max-height: parent;
+
+}
+
+.publication-banner video {
+  position: relative;
+  left: auto;
+  top: auto;
+  transform: none;
+  object-fit: fit;
+}
+
+.publication-header .hero-body {
+}
+
+.publication-title {
+    font-family: 'Google Sans', sans-serif;
+}
+
+.publication-authors {
+    font-family: 'Google Sans', sans-serif;
+}
+
+.publication-venue {
+    color: #555;
+    width: fit-content;
+    font-weight: bold;
+}
+
+.publication-awards {
+    color: #ff3860;
+    width: fit-content;
+    font-weight: bolder;
+}
+
+.publication-authors {
+}
+
+.publication-authors a {
+   color: hsl(204, 86%, 53%) !important;
+}
+
+.publication-authors a:hover {
+    text-decoration: underline;
+}
+
+.author-block {
+  display: inline-block;
+}
+
+.publication-banner img {
+}
+
+.publication-authors {
+  /*color: #4286f4;*/
+}
+
+.publication-video {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 56.25%;
+
+    overflow: hidden;
+    border-radius: 10px !important;
+}
+
+.publication-video iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.publication-body img {
+}
+
+.results-carousel {
+  overflow: hidden;
+}
+
+.results-carousel .item {
+  margin: 5px;
+  overflow: hidden;
+  padding: 20px;
+  font-size: 0;
+}
+
+.results-carousel video {
+  margin: 0;
+}
+
+.slider-pagination .slider-page {
+  background: #000000;
+}
+
+.eql-cntrb { 
+  font-size: smaller;
+}
+
+.custom-carousel {
+  overflow: hidden;
+}
+.custom-carousel-container {
+  max-width: 1000px; /* 按需增大最大宽度值 */
+  margin: 0 auto;
+}
+.custom-carousel .item {
+  margin: 15px;
+  overflow: hidden;
+  padding: 0;
+  font-size: 0;
+  width: calc(100% - 0px);
+  box-sizing: border-box;
+  display: inline-block;
+}
+.custom-carousel video {
+  width: 100%;
+  height: auto;
+  padding: 0px;
+}
+
+
+/* 在index.css中添加以下内容 */
+.gallery-item-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.bottom-prompt-button {
+  margin-top: 10px;
+  background-color: #333; 
+  color: white; 
+  border: none; 
+  padding: 0.75rem 1.5rem; 
+  border-radius: 4px; 
+  cursor: pointer; 
+  margin-left: 1rem;
+  align-self: center;
+  transition: background-color 0.2s;
+}
+
+.bottom-prompt-button:hover {
+  background: #555;
+}
+
+/* 确保视频宽度适应容器 */
+.gallery-item-wrapper video {
+  width: 100%;
+  max-width: 800px; /* 可根据需要调整 */
+}
+
+/* ==== Modal fix: 确保内容在遮罩之上，且水平垂直居中 ==== */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;                 /* 等价于 top/right/bottom/left: 0 */
+  z-index: 9990;            /* 比页面其他元素都高 */
+}
+.modal.is-active {
+  display: flex;            /* 用 flex 居中 */
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-background {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  z-index: 0;               /* 背景在下面 */
+}
+
+.modal-content {
+  position: relative;
+  z-index: 1;               /* 内容在上面 */
+  width: min(90vw, 720px);
+  max-height: 80vh;
+  overflow: auto;
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.3);
+}
+
+/* 头部样式可选优化 */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+/* 关闭按钮保持可点 */
+.modal .delete {
+  position: relative;
+  z-index: 2;
+}
+
+/* ==== Gallery 两行排版 + 方法标签（横向） ==== */
+#gallery .container { max-width: 1400px; }
+
+#gallery .gallery-row {
+  margin-bottom: 28px;
+}
+
+#gallery .row-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+#gallery .method-badge {
+  display: inline-block;
+  font-weight: 700;
+  font-size: 1.5rem;
+  letter-spacing: .02em;
+  padding: 6px 12px;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(135deg, #5b86e5 0%, #36d1dc 100%);
+  box-shadow: 0 6px 18px rgba(54, 209, 220, .25);
+}
+
+/* 保持与现有风格一致的小卡片外观 */
+#gallery .gallery-item-wrapper video {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  display: block;
+  box-shadow: 0 8px 24px rgba(0,0,0,.12);
+}
+
+/* 轮播按钮不压住视频（如果你对 Comparison 做过美化，这里也统一一下） */
+#gallery .carousel { overflow: hidden; }
+#gallery .carousel .carousel-nav-left,
+#gallery .carousel .carousel-nav-right{
+  top: 50%;
+  width: 42px; height: 42px;
+  border-radius: 9999px;
+  background: rgba(255,255,255,.92);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(0,0,0,.06);
+  box-shadow: 0 8px 24px rgba(0,0,0,.18);
+}
+
+/* 小屏优化：标题与轮播间距更紧凑 */
+@media (max-width: 768px){
+  #gallery .method-badge { font-size: 0.9rem; }
+}
+

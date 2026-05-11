@@ -1,0 +1,1 @@
+NPC: Active_Behavior(Crouch: Lowering the body into a squatting stance to avoid high attacks or prepare low attacks.), Passive_Behavior(Idle: Stands still without input, waiting for an interaction.), Strategy(Control: Uses range and zoning tools to keep the opponent at a preferred distance and force reactions.)

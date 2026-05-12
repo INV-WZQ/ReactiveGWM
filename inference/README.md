@@ -139,17 +139,6 @@ The **first frame is shared per variant**, sitting at the variant root
 rollout to the `(prompt, actions)` pair, which makes side-by-side strategy
 comparison clean.
 
-### Sample inventory (locked-in)
-
-| Sample folder | SF2 source clip | SF3 source clip |
-|---|---|---|
-| `offense/01` | `clip_0000014` | `clip_0000104` |
-| `offense/02` | `clip_0000020` | `clip_0000177` |
-| `control/01` | `clip_0000008` | `clip_0000041` |
-| `control/02` | `clip_0000044` | `clip_0000042` |
-| `defense/01` | `clip_0000071` | `clip_0000098` |
-| `defense/02` | `clip_0000074` | `clip_0000207` |
-
 ### Running an example
 
 Assume the checkpoints and base assets have been laid out under `./models/`
@@ -166,38 +155,3 @@ python inference/inference.py \
     --base_model ./base_model \
     --out        out_sf2_offense_01.mp4
 ```
-
-The prompt expands inline to:
-
-```
-NPC: Active_Behavior(Crouch: Enters and holds a crouching stance to lower
-the character's hitbox and prepare charged moves.; Standing Punch:
-Executes a basic punch attack while in a standing posture.),
-Passive_Behavior(Idle: Stands perfectly still without any input, waiting
-for an interaction.),
-Strategy(Offense: Closes the distance quickly to apply pressure and
-initiate close combat.)
-```
-
-Expected console output (H200 timing; pipeline load on cold cache ≈ 3.5 min,
-warm-cache reload ≈ 1.5 min):
-
-```
-[SFPipeline] DiT loaded: 1145 keys (10 action_embedders), missing=…, unexpected=0
-Denoising: 100%|██████████| 30/30 [00:16<00:00,  1.83it/s]
-Saved → /…/out_sf2_offense_01.mp4
-```
-
-The output is a **608×480, 20 fps, 101-frame (≈ 5.05 s) MP4** seeded at 2.
-
-To redirect NPC behavior with the same first frame + button stream, swap
-the strategy folder:
-
-```bash
-# Same player inputs, defensive NPC instead of offensive:
---actions    inference/examples/SF2/defense/01/actions.parquet \
---prompt     "$(cat inference/examples/SF2/defense/01/prompt.txt)"
-```
-
-Swap `SF2`→`SF3` (and `--variant` / `--ckpt` / `--image`) to run the other
-variant — SF3 outputs at 832×480 instead of 608×480.

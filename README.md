@@ -1,8 +1,14 @@
 # ReactiveGWM: Steering NPC in Reactive Game World Models
 
-<p align="center">
-  <img src="assets/SF2.gif" alt="SF2 demo">
-</p>
+
+<div align="center">
+  <img src="assets/SF3.gif" width="70%" ></img>
+  <br>
+  <em>
+      A reactive demo on the SF3 game.
+  </em>
+</div>
+<br>
 
 <a href="https://reactivegwm.github.io/ReactiveGWM/"><img src="https://img.shields.io/badge/Web-Project Page-1d72b8.svg" alt="Project Page"></a>
 <a href=""><img src="https://img.shields.io/badge/arXiv-ReactiveGWM-A42C25.svg" alt="arXiv"></a>
@@ -22,10 +28,10 @@
 **ReactiveGWM** is a novel game world model that synthesizes dynamic interactions between the player and **NPC**. Unlike current player-centric game world models, ReactiveGWM explicitly decouples player control from NPC autonomy: player actions are injected into the diffusion backbone via a lightweight additive bias, while high-level NPC strategies (Offense, Control, Defense) are grounded through cross-attention modules. These modules learn a *game-agnostic* representation of interactive logic, enabling zero-shot strategy transfer to vanilla world models of different games without retraining. Experiments on Street Fighter 2 and Street Fighter Alpha 3 show ReactiveGWM delivers fine-grained player controllability alongside autonomous, prompt-aligned NPC behavior.
 
 <div align="center">
-  <img src="assets/SF3.gif" width="70%" ></img>
+  <img src="assets/SF2.gif" width="70%" ></img>
   <br>
   <em>
-      A reactive demo on the SF3 game.
+      A reactive demo on the SF2 game.
   </em>
 </div>
 <br>

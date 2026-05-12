@@ -16,3 +16,7 @@ dist/
 
 # Default example.py output (use --out <path> for persistent outputs)
 out.mp4
+
+# Source MOVs for assets/SF{2,3}.gif — kept locally, not in repo
+# (too large for plain git; regenerate GIFs via ffmpeg if/when needed)
+assets/*.mov

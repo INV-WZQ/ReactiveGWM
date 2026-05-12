@@ -127,18 +127,17 @@ strategy steering. Twelve ready-to-use prompts ship under `examples/`.
 
 Twelve per-strategy sample inputs (3 strategies × 2 samples × 2 variants),
 drawn from [`INV-WZQ/ReactiveGWM-Datasets`](https://huggingface.co/datasets/INV-WZQ/ReactiveGWM-Datasets).
-Each leaf `<NN>/` folder contains exactly three files:
+Each leaf `<NN>/` folder contains exactly two files:
 
 | File | CLI flag | Notes |
 |---|---|---|
 | `prompt.txt` | `--prompt` | Strategy-aware NPC prompt with `Strategy(<class>: …)`. |
-| `first_frame.png` | `--image` | First frame from the source clip. |
 | `actions.parquet` | `--actions` | 100 rows × 10 buttons at 10 Hz. |
 
-Each variant also has a **unified hero frame** at the variant root
-(`SF2/SF2.png`, `SF3/SF3.png`). Substituting this in place of the
-sample-local `first_frame.png` isolates the rollout to the (prompt, actions)
-pair, which makes side-by-side strategy comparison clean.
+The **first frame is shared per variant**, sitting at the variant root
+(`SF2/SF2.png`, `SF3/SF3.png`). Fixing it across all samples isolates each
+rollout to the `(prompt, actions)` pair, which makes side-by-side strategy
+comparison clean.
 
 ### Sample inventory (locked-in)
 
@@ -153,38 +152,52 @@ pair, which makes side-by-side strategy comparison clean.
 
 ### Running an example
 
-```bash
-SAMPLE=inference/examples/SF2/offense/01
-
-python inference/inference.py \
-    --variant sf2 --ckpt <path-to-sf2.safetensors> \
-    --image     $SAMPLE/first_frame.png \
-    --actions   $SAMPLE/actions.parquet \
-    --prompt    "$(cat $SAMPLE/prompt.txt)" \
-    --base_model <base_model_dir> \
-    --out out.mp4
-```
-
-Swap `SF2`→`SF3` (and `--variant` / `--ckpt`) for the other variant; swap
-the strategy folder (`offense` / `control` / `defense`) to redirect NPC
-behavior with the same first frame + button stream.
-
-For a strategy-contrast figure, use the unified hero frame instead:
+Assume the checkpoints and base assets have been laid out under `./models/`
+and `./base_model/` (as per the top-level [README](../README.md#-setup)).
+A complete run of `SF2/offense/01`:
 
 ```bash
 python inference/inference.py \
-    --variant sf2 --ckpt <ckpt> \
-    --image inference/examples/SF2/SF2.png \              # <- unified hero
-    --actions $SAMPLE/actions.parquet \
-    --prompt  "$(cat $SAMPLE/prompt.txt)" \
-    --base_model <base_model_dir> --out out.mp4
+    --variant    sf2 \
+    --ckpt       ./models/SF2/ReactiveGWM_base.safetensors \
+    --image      inference/examples/SF2/SF2.png \
+    --actions    inference/examples/SF2/offense/01/actions.parquet \
+    --prompt     "$(cat inference/examples/SF2/offense/01/prompt.txt)" \
+    --base_model ./base_model \
+    --out        out_sf2_offense_01.mp4
 ```
 
-### Reproducing the extraction
+The prompt expands inline to:
 
-Initial samples were the lexicographically-first clips per `(variant, strategy)`
-in `metadata.csv` whose prompt contained the target `Strategy(<class>: …)`
-annotation; the release-time roster was then hand-curated for visual variety.
-First frames are decoded via `ffmpeg -frames:v 1 -update 1`. The extraction
-script is not committed because it hard-codes an absolute path to a
-~tens-of-GB dataset checkout.
+```
+NPC: Active_Behavior(Crouch: Enters and holds a crouching stance to lower
+the character's hitbox and prepare charged moves.; Standing Punch:
+Executes a basic punch attack while in a standing posture.),
+Passive_Behavior(Idle: Stands perfectly still without any input, waiting
+for an interaction.),
+Strategy(Offense: Closes the distance quickly to apply pressure and
+initiate close combat.)
+```
+
+Expected console output (H200 timing; pipeline load on cold cache ≈ 3.5 min,
+warm-cache reload ≈ 1.5 min):
+
+```
+[SFPipeline] DiT loaded: 1145 keys (10 action_embedders), missing=…, unexpected=0
+Denoising: 100%|██████████| 30/30 [00:16<00:00,  1.83it/s]
+Saved → /…/out_sf2_offense_01.mp4
+```
+
+The output is a **608×480, 20 fps, 101-frame (≈ 5.05 s) MP4** seeded at 2.
+
+To redirect NPC behavior with the same first frame + button stream, swap
+the strategy folder:
+
+```bash
+# Same player inputs, defensive NPC instead of offensive:
+--actions    inference/examples/SF2/defense/01/actions.parquet \
+--prompt     "$(cat inference/examples/SF2/defense/01/prompt.txt)"
+```
+
+Swap `SF2`→`SF3` (and `--variant` / `--ckpt` / `--image`) to run the other
+variant — SF3 outputs at 832×480 instead of 608×480.

@@ -5,10 +5,8 @@
 </p>
 
 > **ReactiveGWM: Steering NPC in Reactive Game World Models**   🥯[[Arxiv]]()   🌐[[Project Page]](https://reactivegwm.github.io/ReactiveGWM/)   
-> [Zeqing Wang](https://inv-wzq.github.io/)<sup>12</sup>, Danze Chen<sup>12</sup>, [Zhaohu Xing](https://ge-xing.github.io/)<sup>14</sup> , Zizhao Tong<sup>15</sup> , Yinhan Zhang<sup>16</sup> , [Xingyi Yang](https://adamdad.github.io/)<sup>3</sup> , [Yeying Jin](https://jinyeying.github.io/)<sup>1</sup>    
-
-> <sup>1</sup> Tencent, <sup>2</sup> National University of Singapore, <sup>3</sup> The Hong Kong Polytechnic University 
-
+> [Zeqing Wang](https://inv-wzq.github.io/)<sup>12</sup>, Danze Chen<sup>12</sup>, [Zhaohu Xing](https://ge-xing.github.io/)<sup>14</sup> , Zizhao Tong<sup>15</sup> , Yinhan Zhang<sup>16</sup> , [Xingyi Yang](https://adamdad.github.io/)<sup>3</sup> , [Yeying Jin](https://jinyeying.github.io/)<sup>1</sup>  
+> <sup>1</sup> Tencent, <sup>2</sup> National University of Singapore, <sup>3</sup> The Hong Kong Polytechnic University  
 > <sup>4</sup> The Hong Kong University of Science and Technology (Guangzhou), <sup>5</sup> University of Chinese Academy of Sciences, <sup>6</sup> The Hong Kong University of Science and Technology
 
 ## 📚 Introduction
@@ -62,15 +60,16 @@ SAMPLE=inference/examples/SF2/offense/01
 
 python inference/inference.py \
     --variant sf2 --ckpt <path-to-sf2.safetensors> \
-    --image     $SAMPLE/first_frame.png \
+    --image     inference/examples/SF2/SF2.png \
     --actions   $SAMPLE/actions.parquet \
     --prompt    "$(cat $SAMPLE/prompt.txt)" \
     --base_model <base_model_dir> \
     --out out.mp4
 ```
 
-Swap `SF2`→`SF3` (and `--variant` / `--ckpt`) to run the other variant.
-Swap `offense` / `control` / `defense` to redirect NPC behavior with the
+The first frame is shared per variant (`inference/examples/<variant>/<variant>.png`);
+swap the `--image` along with `--variant` / `--ckpt` when moving from SF2 to
+SF3. Swap `offense` / `control` / `defense` to redirect NPC behavior with the
 same first frame and button stream.
 
 For the full CLI argument table, the public Python API, module layout, and

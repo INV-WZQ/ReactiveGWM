@@ -15,6 +15,9 @@
 > <sup>1</sup> Tencent, <sup>2</sup> National University of Singapore, <sup>3</sup> The Hong Kong Polytechnic University  
 > <sup>4</sup> The Hong Kong University of Science and Technology (Guangzhou), <sup>5</sup> University of Chinese Academy of Sciences, <sup>6</sup> The Hong Kong University of Science and Technology
 
+## ⭐ Updates
+- **[May 15, 2026]**: Inference Code, model and dataset are released.
+
 ## 📚 Introduction
 **ReactiveGWM** is a novel game world model that synthesizes dynamic interactions between the player and **NPC**. Unlike current player-centric game world models, ReactiveGWM explicitly decouples player control from NPC autonomy: player actions are injected into the diffusion backbone via a lightweight additive bias, while high-level NPC strategies (Offense, Control, Defense) are grounded through cross-attention modules. These modules learn a *game-agnostic* representation of interactive logic, enabling zero-shot strategy transfer to vanilla world models of different games without retraining. Experiments on Street Fighter 2 and Street Fighter Alpha 3 show ReactiveGWM delivers fine-grained player controllability alongside autonomous, prompt-aligned NPC behavior.
 

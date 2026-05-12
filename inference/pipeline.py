@@ -1,6 +1,6 @@
 """SFPipeline: diffusers-style inference for SF2/SF3 game-action video DiT.
 
-    from ReactiveGWM import SFPipeline
+    from ReactiveGWM_Code.inference import SFPipeline
     pipe = SFPipeline.from_pretrained(base_model_dir, ckpt_path, variant="sf3").to("cuda")
     out  = pipe(image=PIL_image, actions_parquet="actions.parquet", num_frames=101, ...)
     frames = out.frames[0]   # list[PIL.Image]

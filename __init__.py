@@ -1,10 +1,6 @@
-from .constants import NEG_PROMPT, SF_BUTTON_COLS, VARIANT_DEFAULTS
-from .pipeline import SFPipeline, SFPipelineOutput
+"""ReactiveGWM_Code: project namespace.
 
-__all__ = [
-    "SFPipeline",
-    "SFPipelineOutput",
-    "SF_BUTTON_COLS",
-    "NEG_PROMPT",
-    "VARIANT_DEFAULTS",
-]
+The inference pipeline lives at ``ReactiveGWM_Code.inference``.
+
+    from ReactiveGWM_Code.inference import SFPipeline
+"""

@@ -5,7 +5,7 @@
 </p>
 
 > **ReactiveGWM: Steering NPC in Reactive Game World Models**   🥯[[Arxiv]]()   🌐[[Project Page]](https://reactivegwm.github.io/ReactiveGWM/)   
-> [Zeqing Wang](https://inv-wzq.github.io/)<sup>12</sup>, [Danze Chen]()<sup>12</sup>, [Zhaohu Xing](https://ge-xing.github.io/)<sup>14</sup> , [Zizhao Tong]()<sup>15</sup> , [Yinhan Zhang]()<sup>16</sup> , [Xingyi Yang](https://adamdad.github.io/)<sup>3</sup> , [Yeying jin](https://jinyeying.github.io/)<sup>1</sup>    
+> [Zeqing Wang](https://inv-wzq.github.io/)<sup>12</sup>, Danze Chen<sup>12</sup>, [Zhaohu Xing](https://ge-xing.github.io/)<sup>14</sup> , Zizhao Tong<sup>15</sup> , Yinhan Zhang<sup>16</sup> , [Xingyi Yang](https://adamdad.github.io/)<sup>3</sup> , [Yeying Jin](https://jinyeying.github.io/)<sup>1</sup>    
 
 > <sup>1</sup> Tencent, <sup>2</sup> National University of Singapore, <sup>3</sup> The Hong Kong Polytechnic University 
 
@@ -51,29 +51,30 @@ Arrange the base assets under a single `<base_model_dir>`:
         └── google/umt5-xxl/        # HF tokenizer files
 ```
 
-## 🚀 Usage
-```bash
-# Street Fighter II: Champion Edition
-python example.py \
-    --variant sf2 --ckpt <path-to-sf2.safetensors> \
-    --image first.png --actions actions.parquet \
-    --base_model <base_model_dir> --out sf2.mp4
+## 🚀 Quick start
 
-# Street Fighter Alpha 3
-python example.py \
-    --variant sf3 --ckpt <path-to-sf3.safetensors> \
-    --image first.png --actions actions.parquet \
-    --base_model <base_model_dir> --out sf3.mp4
+The repo ships **12 pre-built example samples** under
+[`inference/examples/`](inference/examples) (3 strategies × 2 samples × 2
+variants). Pick any one and run:
+
+```bash
+SAMPLE=inference/examples/SF2/offense/01
+
+python inference/inference.py \
+    --variant sf2 --ckpt <path-to-sf2.safetensors> \
+    --image     $SAMPLE/first_frame.png \
+    --actions   $SAMPLE/actions.parquet \
+    --prompt    "$(cat $SAMPLE/prompt.txt)" \
+    --base_model <base_model_dir> \
+    --out out.mp4
 ```
 
-Arguments:
-- `--variant`: `sf2` or `sf3`. Selects the variant-specific training prompt and native resolution (`sf2` → 480×608, `sf3` → 480×832).
-- `--ckpt`: ReactiveGWM DiT checkpoint (`.safetensors`) from [`INV-WZQ/ReactiveGWM-Models`](https://huggingface.co/INV-WZQ/ReactiveGWM-Models).
-- `--image`: First-frame conditioning image (png/jpg). Aspect-preserving fit + center-crop, matching training-time pre-processing.
-- `--actions`: Path to actions parquet with 10 button columns — `UP, DOWN, LEFT, RIGHT, Y, X, Z, A, B, C`. Sampled at 10Hz and hold-upsampled onto the 20fps video grid; sample parquet files are released in [`INV-WZQ/ReactiveGWM-Datasets`](https://huggingface.co/datasets/INV-WZQ/ReactiveGWM-Datasets).
-- `--base_model`: Directory holding the Wan2.2 base assets (VAE, T5 weights, and tokenizer).
-- `--num_frames`, `--steps`, `--cfg`, `--action_cfg`, `--height`, `--width`, `--seed`: Inference configuration. `--cfg` is text-CFG; `--action_cfg` is action-conditional CFG (raise above 1 to amplify the action signal). Defaults are `num_frames=101, steps=30, cfg=5.0, action_cfg=1.0, seed=0` and `H/W` from the variant default.
-- `--prompt`, `--negative_prompt`: Override text prompts. Defaults are the variant-specific training prompt and the shared Chinese negative prompt in `constants.NEG_PROMPT`. To trigger strategy-aware NPC behavior, pass an NPC-style prompt that names a tactical category (Offense / Control / Defense) plus active/passive behaviors.
+Swap `SF2`→`SF3` (and `--variant` / `--ckpt`) to run the other variant.
+Swap `offense` / `control` / `defense` to redirect NPC behavior with the
+same first frame and button stream.
+
+For the full CLI argument table, the public Python API, module layout, and
+the per-strategy example inventory, see [**`inference/README.md`**](inference/README.md).
 
 ## 🤓 Acknowledgments
 ReactiveGWM is built on top of [Wan2.2-TI2V-5B](https://github.com/Wan-Video/Wan2.2) and adapts modeling / scheduler components from [DiffSynth-Studio](https://github.com/modelscope/DiffSynth-Studio). Gameplay recording uses the [stable-retro](https://github.com/Farama-Foundation/stable-retro) framework, and NPC strategy annotations are produced by [Gemini](https://deepmind.google/technologies/gemini/). We extend our gratitude to the open-source community for their valuable contributions!

@@ -4,19 +4,25 @@
   <img src="assets/SF2.gif" alt="SF2 demo">
 </p>
 
+<a href="https://reactivegwm.github.io/ReactiveGWM/"><img src="https://img.shields.io/badge/Web-Project Page-1d72b8.svg" alt="Project Page"></a>
+<a href=""><img src="https://img.shields.io/badge/arXiv-ReactiveGWM-A42C25.svg" alt="arXiv"></a>
+<a href="https://huggingface.co/INV-WZQ/ReactiveGWM-Models"><img src="https://img.shields.io/badge/🤗_HuggingFace-Model-ffbd45.svg" alt="HuggingFace Model"></a>
+<a href="https://huggingface.co/datasets/INV-WZQ/ReactiveGWM-Datasets"><img src="https://img.shields.io/badge/🤗_HuggingFace-Dataset-ffbd45.svg" alt="HuggingFace Dataset"></a>
+
+
 > **ReactiveGWM: Steering NPC in Reactive Game World Models**   🥯[[Arxiv]]()   🌐[[Project Page]](https://reactivegwm.github.io/ReactiveGWM/)   
 > [Zeqing Wang](https://inv-wzq.github.io/)<sup>12</sup>, Danze Chen<sup>12</sup>, [Zhaohu Xing](https://ge-xing.github.io/)<sup>14</sup> , Zizhao Tong<sup>15</sup> , Yinhan Zhang<sup>16</sup> , [Xingyi Yang](https://adamdad.github.io/)<sup>3</sup> , [Yeying Jin](https://jinyeying.github.io/)<sup>1</sup>  
 > <sup>1</sup> Tencent, <sup>2</sup> National University of Singapore, <sup>3</sup> The Hong Kong Polytechnic University  
 > <sup>4</sup> The Hong Kong University of Science and Technology (Guangzhou), <sup>5</sup> University of Chinese Academy of Sciences, <sup>6</sup> The Hong Kong University of Science and Technology
 
 ## 📚 Introduction
-**ReactiveGWM** is a novel reactive game world model that synthesizes dynamic interactions between the player and NPC. Different from current game world models that simulate environments from a *player-centric* perspective — reducing the Non-Player Character (NPC) to background pixels — ReactiveGWM explicitly decouples player control from NPC autonomy: player actions are injected into the diffusion backbone via a lightweight additive bias, while high-level NPC strategies (Offense, Control, Defense) are grounded through cross-attention modules. These modules learn a *game-agnostic representation* of interactive logic, enabling **zero-shot strategy transfer** to off-the-shelf vanilla world models of different games without retraining. Experiments on *Street Fighter II* (SF2) and *Street Fighter Alpha 3* (SF3) show that ReactiveGWM delivers fine-grained player controllability alongside autonomous, prompt-aligned NPC behavior.
+**ReactiveGWM** is a novel game world model that synthesizes dynamic interactions between the player and **NPC**. Unlike current player-centric game world models, ReactiveGWM explicitly decouples player control from NPC autonomy: player actions are injected into the diffusion backbone via a lightweight additive bias, while high-level NPC strategies (Offense, Control, Defense) are grounded through cross-attention modules. These modules learn a *game-agnostic* representation of interactive logic, enabling zero-shot strategy transfer to vanilla world models of different games without retraining. Experiments on Street Fighter 2 and Street Fighter Alpha 3 show ReactiveGWM delivers fine-grained player controllability alongside autonomous, prompt-aligned NPC behavior.
 
 <div align="center">
   <img src="assets/SF3.gif" width="70%" ></img>
   <br>
   <em>
-      A reactive rollout on the SF3 variant.
+      A reactive demo on the SF3 game.
   </em>
 </div>
 <br>

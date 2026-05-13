@@ -4,22 +4,19 @@
   <meta charset="utf-8">
   <!-- Meta tags for social media banners, these should be filled in appropriatly as they are your "business card" -->
   <!-- Replace the content tag with appropriate information -->
-  <meta name="description" content="DESCRIPTION META TAG">
-  <meta property="og:title" content="SOCIAL MEDIA TITLE TAG"/>
-  <meta property="og:description" content="SOCIAL MEDIA DESCRIPTION TAG TAG"/>
-  <meta property="og:url" content="URL OF THE WEBSITE"/>
-  <!-- Path to banner image, should be in the path listed below. Optimal dimenssions are 1200X630-->
+  <meta name="description" content="ReactiveGWM: a reactive game world model that decouples player control from NPC strategy, enabling steerable NPC behavior and zero-shot cross-game strategy transfer.">
+  <meta property="og:title" content="ReactiveGWM: Steering NPC in Reactive Game World Models"/>
+  <meta property="og:description" content="A reactive game world model that decouples player control from NPC strategy, enabling steerable NPC behavior and zero-shot cross-game strategy transfer."/>
+  <meta property="og:url" content=""/>
   <meta property="og:image" content="static/image/your_banner_image.png" />
   <meta property="og:image:width" content="1200"/>
   <meta property="og:image:height" content="630"/>
 
-  <meta name="twitter:title" content="TWITTER BANNER TITLE META TAG">
-  <meta name="twitter:description" content="TWITTER BANNER DESCRIPTION META TAG">
-  <!-- Path to banner image, should be in the path listed below. Optimal dimenssions are 1200X600-->
+  <meta name="twitter:title" content="ReactiveGWM: Steering NPC in Reactive Game World Models">
+  <meta name="twitter:description" content="A reactive game world model that decouples player control from NPC strategy, enabling steerable NPC behavior and zero-shot cross-game strategy transfer.">
   <meta name="twitter:image" content="static/images/your_twitter_banner_image.png">
   <meta name="twitter:card" content="summary_large_image">
-  <!-- Keywords for your paper to be indexed by-->
-  <meta name="keywords" content="KEYWORDS SHOULD BE PLACED HERE">
+  <meta name="keywords" content="game world model, NPC steering, video diffusion, zero-shot transfer, reactive simulation, Street Fighter, NeurIPS 2026">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>ReactiveGWM: Steering NPC in Reactive Game World Models</title>
@@ -45,125 +42,182 @@
 </head>
 <body>
 
-  <section class="hero">
+  <section class="hero hero-banner">
     <div class="hero-body">
       <div class="container is-max-desktop">
         <div class="columns is-centered">
           <div class="column has-text-centered">
             <h1 class="title is-1 publication-title">ReactiveGWM: Steering NPC in Reactive Game World Models</h1>
-            
+
+            <p class="publication-authors">
+              Zeqing Wang<sup>1,2</sup>,
+              Danze Chen<sup>1,2</sup>,
+              Zhaohu Xing<sup>1,4</sup>,
+              Zizhao Tong<sup>1,5</sup>,
+              Yinhan Zhang<sup>1,6</sup>,
+              Xingyi Yang<sup>3</sup>,
+              Yeying Jin<sup>1</sup>
+            </p>
+            <p class="publication-affiliations">
+              <span><sup>1</sup> Tencent</span>,
+              <span><sup>2</sup> National University of Singapore</span>,
+              <span><sup>3</sup> The Hong Kong Polytechnic University</span>,
+              <span><sup>4</sup> The Hong Kong University of Science and Technology (Guangzhou)</span>,
+              <span><sup>5</sup> University of Chinese Academy of Sciences</span>,
+              <span><sup>6</sup> The Hong Kong University of Science and Technology</span>
+            </p>
+
+            <div class="publication-links">
+              <a class="external-link button is-rounded is-dark" href="#" target="_blank" rel="noopener">
+                <span class="icon"><i class="ai ai-arxiv"></i></span>
+                <span>arXiv</span>
+              </a>
+              <a class="external-link button is-rounded is-dark" href="https://github.com/INV-WZQ/ReactiveGWM" target="_blank" rel="noopener">
+                <span class="icon"><i class="fab fa-github"></i></span>
+                <span>Code</span>
+              </a>
+              <a href="https://huggingface.co/INV-WZQ/ReactiveGWM-Models" target="_blank" rel="noopener">
+                <img src="https://img.shields.io/badge/🤗_HuggingFace-Model-ffbd45.svg" alt="HuggingFace Model">
+              </a>
+              <a href="https://huggingface.co/datasets/INV-WZQ/ReactiveGWM-Datasets" target="_blank" rel="noopener">
+                <img src="https://img.shields.io/badge/🤗_HuggingFace-Dataset-ffbd45.svg" alt="HuggingFace Dataset">
+              </a>
+            </div>
+
+            <nav class="hero-nav" aria-label="Section navigation">
+              <a href="#tldr" class="hero-nav-link">TL;DR</a>
+              <a href="#method" class="hero-nav-link">Method</a>
+              <a href="#config-overview" class="hero-nav-link">Configurations</a>
+              <a href="#sf2-comparison" class="hero-nav-link">SF2</a>
+              <a href="#sf3-comparison" class="hero-nav-link">SF3</a>
+            </nav>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="hero is-small config-overview-section" id="config-overview">
-    <div class="hero-body">
-      <div class="container is-max-desktop">
-        <div class="config-overview-head has-text-centered">
-          <h2 class="title is-3">Configuration Overview</h2>
-          <p class="config-overview-subtitle">
-            A clear comparison across three factors:<br>
-            <strong>training source</strong>, <strong>strategy data usage</strong>, and <strong>whether the NPC follows strategy commands</strong>.
-          </p>
-        </div>
+  <!-- TL;DR Section -->
+  <section class="section tldr-section" id="tldr">
+    <div class="container is-max-desktop">
+      <div class="tldr-wrap">
+        <span class="tldr-label">TL;DR</span>
+        <p class="tldr-lead">
+          A game world model where the <b>NPC follows high-level strategies</b>, not just appears as background pixels — and the strategy module <b>transfers zero-shot</b> to a new game.
+        </p>
+        <p class="tldr-detail">
+          ReactiveGWM decouples player control from NPC behavior: player buttons enter the diffusion backbone as a lightweight additive bias, while NPC intents (Offense / Defense / Control) are grounded through cross-attention. Trained on one game, the cross-attention modules plug directly into an unannotated world model of a different game — unlocking steerable NPCs without retraining.
+        </p>
+      </div>
+    </div>
+  </section>
 
-        <div class="config-cards">
-          <article class="cfg-card cfg-vanilla">
-            <div class="cfg-card-top">
-              <h3 class="cfg-title">Vanilla</h3>
-            </div>
-            <ul class="cfg-metric-list">
-              <li class="cfg-metric">
-                <span class="cfg-metric-label">Training source</span>
-                <span class="cfg-metric-value">Trained on this game<br><span class="cfg-note">(no strategy labels)</span></span>
-              </li>
-              <li class="cfg-metric">
-                <span class="cfg-metric-label">Strategy data</span>
-                <span class="cfg-metric-value"><span class="cfg-badge cfg-badge-off">— Not used</span></span>
-              </li>
-              <li class="cfg-metric">
-                <span class="cfg-metric-label">NPC strategy following</span>
-                <span class="cfg-metric-value cfg-no">✗ Does not follow strategy commands</span>
-              </li>
-            </ul>
-          </article>
+  <!-- Method Section -->
+  <section class="section method-section" id="method">
+    <div class="container is-max-desktop">
+      <div class="section-head has-text-centered">
+        <p class="section-eyebrow">Method</p>
+        <h2 class="section-title">Decoupling player control and NPC strategy</h2>
+        <p class="section-subtitle">
+          Two non-interfering pathways inside the DiT block: an <b>additive bias</b> for fine-grained player buttons, and <b>cross-attention</b> for high-level NPC strategy. Self-attention and FFN keep modeling the game's native dynamics.
+        </p>
+      </div>
 
-          <article class="cfg-card cfg-base">
-            <div class="cfg-card-top">
-              <h3 class="cfg-title">ReactiveGWM <sub>base</sub></h3>
-            </div>
-            <ul class="cfg-metric-list">
-              <li class="cfg-metric">
-                <span class="cfg-metric-label">Training source</span>
-                <span class="cfg-metric-value">Trained on this game<br><span class="cfg-note">(with strategy labels)</span></span>
-              </li>
-              <li class="cfg-metric">
-                <span class="cfg-metric-label">Strategy data</span>
-                <span class="cfg-metric-value"><span class="cfg-badge cfg-badge-on">✓ Used</span></span>
-              </li>
-              <li class="cfg-metric">
-                <span class="cfg-metric-label">NPC strategy following</span>
-                <span class="cfg-metric-value cfg-yes">✓ Follows strategy commands</span>
-              </li>
-            </ul>
-          </article>
+      <!-- Pipeline: 3 stages -->
+      <ol class="pipeline">
+        <li class="pipeline-step">
+          <div class="pipeline-num">1</div>
+          <div class="pipeline-body">
+            <h3 class="pipeline-title">Strategy-aligned data</h3>
+            <p class="pipeline-text">
+              Each clip is paired with an <b>NPC-only structured prompt</b> — a strategy (Offense / Defense / Control) plus active &amp; passive behaviors — separated from player actions and scene captions.
+            </p>
+            <figure class="pipeline-figure">
+              <img src="static/figures/data_construction.png" alt="Data construction pipeline: gameplay clips paired with NPC-only structured prompts">
+              <figcaption>Construction of strategy-aligned data: every clip is annotated with player actions and an NPC-only structured prompt.</figcaption>
+            </figure>
+          </div>
+        </li>
+        <li class="pipeline-step">
+          <div class="pipeline-num">2</div>
+          <div class="pipeline-body">
+            <h3 class="pipeline-title">Two pathways inside the DiT block</h3>
+            <p class="pipeline-text">
+              <b>Player buttons</b> are pooled to the latent frame rate and added as a residual bias. <b>NPC strategy</b> is encoded as text and injected via cross-attention. Self-attention and FFN are left intact.
+            </p>
+            <figure class="pipeline-figure pipeline-figure-narrow">
+              <img src="static/figures/DiT.png" alt="DiT block with player additive bias and NPC strategy cross-attention">
+              <figcaption>DiT block with action module (additive bias) and strategy cross-attention.</figcaption>
+            </figure>
+          </div>
+        </li>
+        <li class="pipeline-step">
+          <div class="pipeline-num">3</div>
+          <div class="pipeline-body">
+            <h3 class="pipeline-title">Train once, transfer zero-shot</h3>
+            <p class="pipeline-text">
+              <b>ReactiveGWM<sub>base</sub></b>: full fine-tuning on a source game with strategy annotations.
+              <b>ReactiveGWM<sub>transfer</sub></b>: reuse the target game's vanilla backbone and plug in our trained cross-attention — steerable NPCs without any retraining on the new game.
+            </p>
+            <figure class="pipeline-figure">
+              <img src="static/figures/training.png" alt="Training and training-free transfer of the strategy module across games">
+              <figcaption>Overview of ReactiveGWM training and training-free transfer to a different game.</figcaption>
+            </figure>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
 
-          <article class="cfg-card cfg-transfer">
-            <div class="cfg-card-top">
-              <h3 class="cfg-title">ReactiveGWM <sub>transfer</sub></h3>
-            </div>
-            <ul class="cfg-metric-list">
-              <li class="cfg-metric">
-                <span class="cfg-metric-label">Training source</span>
-                <span class="cfg-metric-value">No training on this game<br><span class="cfg-note">— strategy reused from a different game</span></span>
-              </li>
-              <li class="cfg-metric">
-                <span class="cfg-metric-label">Strategy data</span>
-                <span class="cfg-metric-value"><span class="cfg-badge cfg-badge-on">— Not used</span></span>
-              </li>
-              <li class="cfg-metric">
-                <span class="cfg-metric-label">NPC strategy following</span>
-                <span class="cfg-metric-value cfg-yes">✓ Follows strategy commands<br><span class="cfg-zs">(zero-shot on this game)</span></span>
-              </li>
-            </ul>
-          </article>
-        </div>
+  <section class="section config-overview-section" id="config-overview">
+    <div class="container is-max-desktop">
+      <div class="section-head has-text-centered">
+        <p class="section-eyebrow">Configurations</p>
+        <h2 class="section-title">Control interface</h2>
+        <p class="section-subtitle">
+          The <b>player</b> is controlled via low-level <b>buttons</b>; the <b>NPC</b> is steered via a high-level <b>strategy</b>.
+        </p>
+      </div>
 
         <div class="cfg-role-overview" aria-label="Control role overview">
           <div class="cfg-role-overview-head">
-            <h3 class="cfg-role-title">Control Interface Overview</h3>
-            <p class="cfg-role-subtitle">The left side shows the <strong>player</strong> issuing actions via <strong>buttons</strong>.<br>The right side shows the <strong>NPC</strong> receiving high-level guidance via <strong>strategy</strong>.</p>
+            <p class="cfg-role-legend">
+              <span class="cfg-legend-item cfg-legend-player">
+                <span class="cfg-legend-dot cfg-legend-dot-player"></span>Player — controlled by buttons
+              </span>
+              <span class="cfg-legend-item cfg-legend-npc">
+                <span class="cfg-legend-dot cfg-legend-dot-npc"></span>NPC — steered by strategy
+              </span>
+            </p>
           </div>
 
           <div class="cfg-role-grid">
-            <article class="cfg-role-card cfg-role-player">
-              <p class="cfg-role-chip">Player Side</p>
+            <article class="cfg-role-card">
               <div class="cfg-role-image-wrap">
-                <img src="./clip_0397519_first_frame_bbox.jpg" alt="Player side controlled by buttons" loading="lazy">
+                <img src="./clip_0397519_first_frame_bbox.jpg" alt="Frame from Street Fighter showing both characters with the player highlighted in blue and the NPC highlighted in red" loading="lazy">
               </div>
-              <p class="cfg-role-caption"><strong>Left:</strong> The <strong>player</strong> directly controls actions through button inputs.</p>
             </article>
 
-            <article class="cfg-role-card cfg-role-npc">
-              <p class="cfg-role-chip">NPC Side</p>
+            <article class="cfg-role-card">
               <div class="cfg-role-image-wrap">
-                <img src="./clip_0337571_first_frame_bbox.jpg" alt="NPC side controlled by strategy" loading="lazy">
+                <img src="./clip_0337571_first_frame_bbox.jpg" alt="Frame from Street Fighter showing both characters with the player highlighted in blue and the NPC highlighted in red" loading="lazy">
               </div>
-              <p class="cfg-role-caption"><strong>Right:</strong> The <strong>NPC</strong> follows high-level intent driven by strategy.</p>
             </article>
           </div>
         </div>
-      </div>
     </div>
   </section>
 
 <!-- Street Fighter II Comparison Section -->
-<section class="hero is-small" id="sf2-comparison">
-  <div class="hero-body">
-    <div class="container has-text-centered is-max-widescreen">
-      <h2 class="title is-3">Street Fighter II Comparison</h2>
+<section class="section demo-section" id="sf2-comparison">
+  <div class="container has-text-centered is-max-widescreen">
+      <div class="section-head">
+        <p class="section-eyebrow">Demo · Street Fighter 2</p>
+        <h2 class="section-title">Same buttons, different strategies</h2>
+        <p class="section-subtitle">
+          Compare the vanilla backbone, <b>ReactiveGWM<sub>base</sub></b>, and <b>ReactiveGWM<sub>transfer</sub></b> under the same player input but different NPC strategies (Offense / Defense / Control).
+        </p>
+      </div>
 
       <div class="control-legend" aria-label="SF2 button mapping">
         <p class="legend-title">SF2 Button Mapping</p>
@@ -199,51 +253,51 @@
                 <div class="method-videos-grid">
                   <div class="video-row">
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="608" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="608" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="608" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="608" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="608" height="480"
-autoplay controls muted loop playsinline></video>
-<div class="video-analysis-box"></div>
-                    </div>
-                  </div>
-                  <div class="video-row">
-                    <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="608" height="480"
-autoplay controls muted loop playsinline></video>
-<div class="video-analysis-box"></div>
-                    </div>
-                    <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="608" height="480"
-autoplay controls muted loop playsinline></video>
-<div class="video-analysis-box"></div>
-                    </div>
-                    <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="608" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="608" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
                   </div>
                   <div class="video-row">
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="608" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="608" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="608" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="608" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="608" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="608" height="480"
+autoplay controls muted loop playsinline></video>
+<div class="video-analysis-box"></div>
+                    </div>
+                  </div>
+                  <div class="video-row">
+                    <div class="method-video">
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="608" height="480"
+autoplay controls muted loop playsinline></video>
+<div class="video-analysis-box"></div>
+                    </div>
+                    <div class="method-video">
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="608" height="480"
+autoplay controls muted loop playsinline></video>
+<div class="video-analysis-box"></div>
+                    </div>
+                    <div class="method-video">
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="608" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
@@ -273,51 +327,51 @@ autoplay controls muted loop playsinline></video>
                 <div class="method-videos-grid">
                   <div class="video-row">
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="608" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="608" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="608" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="608" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="608" height="480"
-autoplay controls muted loop playsinline></video>
-<div class="video-analysis-box"></div>
-                    </div>
-                  </div>
-                  <div class="video-row">
-                    <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="608" height="480"
-autoplay controls muted loop playsinline></video>
-<div class="video-analysis-box"></div>
-                    </div>
-                    <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="608" height="480"
-autoplay controls muted loop playsinline></video>
-<div class="video-analysis-box"></div>
-                    </div>
-                    <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="608" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="608" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
                   </div>
                   <div class="video-row">
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="608" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="608" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="608" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="608" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="608" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="608" height="480"
+autoplay controls muted loop playsinline></video>
+<div class="video-analysis-box"></div>
+                    </div>
+                  </div>
+                  <div class="video-row">
+                    <div class="method-video">
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="608" height="480"
+autoplay controls muted loop playsinline></video>
+<div class="video-analysis-box"></div>
+                    </div>
+                    <div class="method-video">
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="608" height="480"
+autoplay controls muted loop playsinline></video>
+<div class="video-analysis-box"></div>
+                    </div>
+                    <div class="method-video">
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="608" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
@@ -347,51 +401,51 @@ autoplay controls muted loop playsinline></video>
                 <div class="method-videos-grid">
                   <div class="video-row">
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="608" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="608" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="608" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="608" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="608" height="480"
-autoplay controls muted loop playsinline></video>
-<div class="video-analysis-box"></div>
-                    </div>
-                  </div>
-                  <div class="video-row">
-                    <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="608" height="480"
-autoplay controls muted loop playsinline></video>
-<div class="video-analysis-box"></div>
-                    </div>
-                    <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="608" height="480"
-autoplay controls muted loop playsinline></video>
-<div class="video-analysis-box"></div>
-                    </div>
-                    <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="608" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="608" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
                   </div>
                   <div class="video-row">
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="608" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="608" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="608" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="608" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="608" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="608" height="480"
+autoplay controls muted loop playsinline></video>
+<div class="video-analysis-box"></div>
+                    </div>
+                  </div>
+                  <div class="video-row">
+                    <div class="method-video">
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="608" height="480"
+autoplay controls muted loop playsinline></video>
+<div class="video-analysis-box"></div>
+                    </div>
+                    <div class="method-video">
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="608" height="480"
+autoplay controls muted loop playsinline></video>
+<div class="video-analysis-box"></div>
+                    </div>
+                    <div class="method-video">
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="608" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
@@ -412,15 +466,19 @@ autoplay controls muted loop playsinline></video>
         <p class="prompt-detail-meta" id="sf2-prompt-meta">💡 Click the corresponding video to view its prompt details.</p>
         <pre class="prompt-detail-content" id="sf2-prompt-content">No video selected yet.</pre>
       </div>
-    </div>
   </div>
 </section>
 
 <!-- Street Fighter III Comparison Section -->
-<section class="hero is-small" id="sf3-comparison">
-  <div class="hero-body">
-    <div class="container has-text-centered is-max-widescreen">
-      <h2 class="title is-3">Street Fighter III Comparison</h2>
+<section class="section demo-section" id="sf3-comparison">
+  <div class="container has-text-centered is-max-widescreen">
+      <div class="section-head">
+        <p class="section-eyebrow">Demo · Street Fighter 3 · Zero-shot</p>
+        <h2 class="section-title">Cross-game strategy transfer</h2>
+        <p class="section-subtitle">
+          <b>ReactiveGWM<sub>transfer</sub></b> reuses the strategy modules trained on SF2 on top of an unannotated SF3 backbone — steerable NPCs emerge without any retraining on this game.
+        </p>
+      </div>
 
       <div class="control-legend" aria-label="SF3 button mapping">
         <p class="legend-title">SF3 Button Mapping</p>
@@ -456,51 +514,51 @@ autoplay controls muted loop playsinline></video>
                 <div class="method-videos-grid">
                   <div class="video-row">
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="832" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="832" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="832" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="832" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="832" height="480"
-autoplay controls muted loop playsinline></video>
-<div class="video-analysis-box"></div>
-                    </div>
-                  </div>
-                  <div class="video-row">
-                    <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="832" height="480"
-autoplay controls muted loop playsinline></video>
-<div class="video-analysis-box"></div>
-                    </div>
-                    <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="832" height="480"
-autoplay controls muted loop playsinline></video>
-<div class="video-analysis-box"></div>
-                    </div>
-                    <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="832" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="832" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
                   </div>
                   <div class="video-row">
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="832" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="832" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="832" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="832" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="832" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="832" height="480"
+autoplay controls muted loop playsinline></video>
+<div class="video-analysis-box"></div>
+                    </div>
+                  </div>
+                  <div class="video-row">
+                    <div class="method-video">
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="832" height="480"
+autoplay controls muted loop playsinline></video>
+<div class="video-analysis-box"></div>
+                    </div>
+                    <div class="method-video">
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="832" height="480"
+autoplay controls muted loop playsinline></video>
+<div class="video-analysis-box"></div>
+                    </div>
+                    <div class="method-video">
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="832" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
@@ -530,51 +588,51 @@ autoplay controls muted loop playsinline></video>
                 <div class="method-videos-grid">
                   <div class="video-row">
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="832" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="832" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="832" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="832" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="832" height="480"
-autoplay controls muted loop playsinline></video>
-<div class="video-analysis-box"></div>
-                    </div>
-                  </div>
-                  <div class="video-row">
-                    <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="832" height="480"
-autoplay controls muted loop playsinline></video>
-<div class="video-analysis-box"></div>
-                    </div>
-                    <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="832" height="480"
-autoplay controls muted loop playsinline></video>
-<div class="video-analysis-box"></div>
-                    </div>
-                    <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="832" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="832" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
                   </div>
                   <div class="video-row">
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="832" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="832" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="832" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="832" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="832" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="832" height="480"
+autoplay controls muted loop playsinline></video>
+<div class="video-analysis-box"></div>
+                    </div>
+                  </div>
+                  <div class="video-row">
+                    <div class="method-video">
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="832" height="480"
+autoplay controls muted loop playsinline></video>
+<div class="video-analysis-box"></div>
+                    </div>
+                    <div class="method-video">
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="832" height="480"
+autoplay controls muted loop playsinline></video>
+<div class="video-analysis-box"></div>
+                    </div>
+                    <div class="method-video">
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="832" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
@@ -604,51 +662,51 @@ autoplay controls muted loop playsinline></video>
                 <div class="method-videos-grid">
                   <div class="video-row">
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="832" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="832" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="832" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="832" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="832" height="480"
-autoplay controls muted loop playsinline></video>
-<div class="video-analysis-box"></div>
-                    </div>
-                  </div>
-                  <div class="video-row">
-                    <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="832" height="480"
-autoplay controls muted loop playsinline></video>
-<div class="video-analysis-box"></div>
-                    </div>
-                    <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="832" height="480"
-autoplay controls muted loop playsinline></video>
-<div class="video-analysis-box"></div>
-                    </div>
-                    <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="832" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="832" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
                   </div>
                   <div class="video-row">
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="832" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="832" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="832" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="832" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
                     <div class="method-video">
-<video src="static/videos/placeholder.mp4" width="832" height="480"
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="832" height="480"
+autoplay controls muted loop playsinline></video>
+<div class="video-analysis-box"></div>
+                    </div>
+                  </div>
+                  <div class="video-row">
+                    <div class="method-video">
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="832" height="480"
+autoplay controls muted loop playsinline></video>
+<div class="video-analysis-box"></div>
+                    </div>
+                    <div class="method-video">
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="832" height="480"
+autoplay controls muted loop playsinline></video>
+<div class="video-analysis-box"></div>
+                    </div>
+                    <div class="method-video">
+<video src="static/data/demo_other_overlay_chosen/sf2/base/offense/clip_0054360_overlay.mp4" width="832" height="480"
 autoplay controls muted loop playsinline></video>
 <div class="video-analysis-box"></div>
                     </div>
@@ -669,12 +727,443 @@ autoplay controls muted loop playsinline></video>
         <p class="prompt-detail-meta" id="sf3-prompt-meta">💡 Click the corresponding video to view its prompt details.</p>
         <pre class="prompt-detail-content" id="sf3-prompt-content">No video selected yet.</pre>
       </div>
-    </div>
   </div>
 </section>
 
 <!-- Custom CSS for the new layout -->
 <style>
+/* ===========================================================
+   Design tokens — single accent, generous whitespace
+   =========================================================== */
+:root {
+  --ink:        #111827;
+  --ink-soft:   #374151;
+  --ink-muted:  #6b7280;
+  --line:       #e5e7eb;
+  --line-soft:  #f1f5f9;
+  --bg:         #ffffff;
+  --bg-soft:    #f9fafb;
+  --accent:     #2563eb;
+  --accent-soft:#eff6ff;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.publication-title,
+.section-title,
+.tldr-lead,
+.pipeline-title,
+.cfg-title,
+.cfg-role-title,
+.method-title,
+.scenario-title,
+.legend-title,
+.prompt-detail-title {
+  color: var(--ink);
+}
+
+/* ===========================================================
+   Hero / Banner
+   =========================================================== */
+.hero-banner {
+  background: var(--bg-soft);
+  border-bottom: 1px solid var(--line);
+}
+
+.hero-banner .hero-body {
+  padding: 4.4rem 1.5rem 3rem;
+}
+
+.publication-title {
+  font-weight: 700 !important;
+  letter-spacing: -0.015em;
+  line-height: 1.2 !important;
+}
+
+.venue-chip {
+  display: inline-block;
+  margin-bottom: 1rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.publication-authors {
+  margin: 1.1rem auto 0.55rem;
+  max-width: 880px;
+  color: var(--ink);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.publication-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 1.4rem auto 0.4rem;
+}
+
+.publication-links .external-link.button {
+  height: 1.65rem;
+  padding: 0 0.7rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.publication-links .external-link.button .icon {
+  font-size: 0.85rem;
+}
+
+.publication-links img {
+  display: block;
+  height: 1.65rem;
+  vertical-align: middle;
+}
+
+.author-link {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.author-link:hover {
+  color: #1d4ed8;
+}
+
+.publication-authors sup,
+.publication-affiliations sup {
+  font-size: 0.72em;
+  margin-left: 1px;
+}
+
+.publication-affiliations {
+  margin: 0 auto;
+  max-width: 880px;
+  color: var(--ink-muted);
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+
+.publication-affiliations span {
+  white-space: nowrap;
+}
+
+.hero-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem 0.5rem;
+  margin-top: 1.8rem;
+}
+
+.hero-nav-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+  font-size: 0.84rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.hero-nav-link:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* ===========================================================
+   Section common
+   =========================================================== */
+.section {
+  padding: 4rem 1.5rem;
+}
+
+.section + .section {
+  border-top: 0;
+}
+
+.section-head {
+  margin: 0 auto 2.2rem;
+  max-width: 760px;
+}
+
+.section-eyebrow {
+  display: inline-block;
+  margin-bottom: 0.85rem;
+  padding: 0.32rem 0.8rem;
+  border: 1.5px solid var(--accent);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+.section-title {
+  margin: 0 0 0.6rem !important;
+  font-size: 1.85rem;
+  font-weight: 700 !important;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.section-subtitle {
+  margin: 0 auto;
+  max-width: 720px;
+  color: var(--ink-muted);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.section-subtitle b,
+.tldr-detail b,
+.pipeline-text b,
+.tldr-lead b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* ===========================================================
+   TL;DR — single calm block
+   =========================================================== */
+.tldr-wrap {
+  max-width: 780px;
+  margin: 0 auto;
+  text-align: left;
+  border-left: 3px solid var(--accent);
+  padding: 0.4rem 0 0.4rem 1.4rem;
+}
+
+.tldr-label {
+  display: inline-block;
+  margin-bottom: 0.55rem;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.tldr-lead {
+  margin: 0 0 0.7rem;
+  font-size: 1.18rem;
+  font-weight: 600;
+  line-height: 1.55;
+  letter-spacing: -0.005em;
+}
+
+.tldr-detail {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.98rem;
+  line-height: 1.75;
+}
+
+/* ===========================================================
+   Method — 3-step pipeline
+   =========================================================== */
+.pipeline {
+  list-style: none;
+  margin: 0 auto;
+  padding: 0;
+  max-width: 880px;
+  display: flex;
+  flex-direction: column;
+  gap: 2.2rem;
+}
+
+.pipeline-step {
+  display: grid;
+  grid-template-columns: 2.4rem 1fr;
+  gap: 1.1rem;
+  align-items: flex-start;
+}
+
+.pipeline-num {
+  width: 2.4rem;
+  height: 2.4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.pipeline-title {
+  margin: 0.25rem 0 0.45rem;
+  color: var(--ink);
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+}
+
+.pipeline-text {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.98rem;
+  line-height: 1.75;
+}
+
+.pipeline-figure {
+  margin: 1rem 0 0;
+  padding: 0.85rem 0.85rem 0.7rem;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.pipeline-figure img {
+  display: block;
+  width: 100%;
+  max-width: 720px;
+  height: auto;
+  margin: 0 auto;
+}
+
+.pipeline-figure-narrow img {
+  max-width: 460px;
+}
+
+.pipeline-figure figcaption {
+  margin-top: 0.55rem;
+  color: var(--ink-muted);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+/* Architecture schematic — minimal */
+.arch {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr 1fr;
+  align-items: stretch;
+  gap: 0.85rem;
+  margin-top: 1.1rem;
+  padding: 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.arch-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.arch-chip {
+  width: 100%;
+  text-align: center;
+  padding: 0.5rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: #ffffff;
+  font-size: 0.86rem;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.arch-chip-soft {
+  background: var(--bg-soft);
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+.arch-arrow {
+  color: var(--ink-muted);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.arch-core {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg-soft);
+  padding: 0.6rem 0.7rem 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.arch-core-title {
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--ink-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 0.2rem;
+}
+
+.arch-row {
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.arch-row-bias,
+.arch-row-cross {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .arch {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===========================================================
+   Demo sections — clean, video-first
+   =========================================================== */
+.demo-section {
+  padding: 4rem 1.5rem;
+}
+
+.demo-section + .section,
+.section + .demo-section {
+  border-top: 0;
+}
+
+/* ===========================================================
+   Per-section background tints — subtle, harmonious
+   =========================================================== */
+.hero-banner       { background: #e7eef8; } /* deeper blue-gray  */
+.tldr-section      { background: #d9e6f5; } /* clearer light blue */
+.method-section    { background: #ffffff; } /* clean white       */
+#config-overview   { background: #e6eaf2; } /* cool gray         */
+#sf2-comparison    { background: #f1f4f9; } /* near-white gray   */
+#sf3-comparison    { background: #dbe5f2; } /* deeper light blue */
+
 .config-overview-section {
   padding-top: 0.25rem;
 }
@@ -875,6 +1364,36 @@ autoplay controls muted loop playsinline></video>
   font-size: 0.9rem;
   line-height: 1.6;
 }
+
+.cfg-role-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1.4rem;
+  margin: 0;
+  color: #1f2a44;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.cfg-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.cfg-legend-dot {
+  display: inline-block;
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 3px;
+  border: 2px solid;
+  background: transparent;
+}
+
+.cfg-legend-dot-player { border-color: #2563eb; }
+.cfg-legend-dot-npc    { border-color: #dc2626; }
 
 .cfg-role-grid {
   display: grid;
@@ -1259,6 +1778,16 @@ autoplay controls muted loop playsinline></video>
 
 .comp-item {
   padding: 2rem 0;
+}
+
+/* Demo sections — visual polish to align with other sections */
+.demo-section .hero-body {
+  padding-top: 2.4rem;
+  padding-bottom: 2.6rem;
+}
+
+.demo-section .section-head {
+  margin-bottom: 1.2rem;
 }
 
 /* Responsive adjustments */

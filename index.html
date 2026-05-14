@@ -97,6 +97,18 @@
     </div>
   </section>
 
+  <!-- Hero teaser video -->
+  <section class="section teaser-video-section" aria-label="Demo teaser">
+    <div class="container is-max-desktop">
+      <figure class="teaser-video">
+        <video
+          src="static/data/demo_other_overlay_chosen/all_demo_web.mp4"
+          poster="static/data/demo_other_overlay_chosen/all_demo_poster.jpg"
+          autoplay muted loop playsinline controls preload="auto"></video>
+      </figure>
+    </div>
+  </section>
+
   <!-- TL;DR Section -->
   <section class="section tldr-section" id="tldr">
     <div class="container is-max-desktop">
@@ -473,7 +485,7 @@ autoplay controls muted loop playsinline></video>
 <section class="section demo-section" id="sf3-comparison">
   <div class="container has-text-centered is-max-widescreen">
       <div class="section-head">
-        <p class="section-eyebrow">Demo · Street Fighter 3 · Zero-shot</p>
+        <p class="section-eyebrow">Demo · Street Fighter 3</p>
         <h2 class="section-title">Cross-game strategy transfer</h2>
         <p class="section-subtitle">
           <b>ReactiveGWM<sub>transfer</sub></b> reuses the strategy modules trained on SF2 on top of an unannotated SF3 backbone — steerable NPCs emerge without any retraining on this game.
@@ -774,7 +786,7 @@ body {
 }
 
 .hero-banner .hero-body {
-  padding: 4.4rem 1.5rem 3rem;
+  padding: 4.4rem 1.5rem 2rem;
 }
 
 .publication-title {
@@ -944,7 +956,7 @@ body {
    TL;DR — single calm block
    =========================================================== */
 .tldr-wrap {
-  max-width: 780px;
+  max-width: 880px;
   margin: 0 auto;
   text-align: left;
   border-left: 3px solid var(--accent);
@@ -974,6 +986,64 @@ body {
   color: var(--ink-soft);
   font-size: 0.98rem;
   line-height: 1.75;
+}
+
+.tldr-video {
+  margin: 1.1rem 0 0;
+  padding: 0;
+  max-width: 720px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: #000;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.10);
+}
+
+.tldr-video video {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.tldr-video figcaption {
+  display: block;
+  padding: 0.45rem 0.75rem;
+  background: #ffffff;
+  color: var(--ink-muted);
+  font-size: 0.84rem;
+  line-height: 1.5;
+  border-top: 1px solid var(--line);
+}
+
+.teaser-video {
+  display: block;
+  margin: 0 auto;
+  padding: 0;
+  max-width: 560px;
+  width: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: #000;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+  clear: both;
+}
+
+.teaser-video video {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.teaser-video figcaption {
+  display: block;
+  padding: 0.5rem 0.85rem;
+  background: #ffffff;
+  color: var(--ink-muted);
+  font-size: 0.86rem;
+  line-height: 1.5;
+  border-top: 1px solid var(--line);
+  text-align: center;
 }
 
 /* ===========================================================
@@ -1158,7 +1228,13 @@ body {
    Per-section background tints — subtle, harmonious
    =========================================================== */
 .hero-banner       { background: #e7eef8; } /* deeper blue-gray  */
-.tldr-section      { background: #d9e6f5; } /* clearer light blue */
+.teaser-video-section {
+  background: #e7eef8;
+  padding-top: 0;
+  padding-bottom: 2.4rem;
+  margin: 0;
+}
+.tldr-section      { background: #d9e6f5; padding-top: 2.6rem; } /* clearer light blue */
 .method-section    { background: #ffffff; } /* clean white       */
 #config-overview   { background: #e6eaf2; } /* cool gray         */
 #sf2-comparison    { background: #f1f4f9; } /* near-white gray   */

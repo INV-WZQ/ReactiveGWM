@@ -1,0 +1,7 @@
+# Source / large media files (kept local, not pushed)
+static/data/demo_other_overlay_chosen/all_demo.mov
+static/data/demo_other_overlay_chosen/all_demo.mp4
+
+# Server / logs
+/tmp/*.log
+.DS_Store

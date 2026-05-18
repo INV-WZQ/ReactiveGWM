@@ -11,7 +11,7 @@
 <br>
 
 <a href="https://inv-wzq.github.io/ReactiveGWM/"><img src="https://img.shields.io/badge/Web-Project Page-1d72b8.svg" alt="Project Page"></a>
-<a href=""><img src="https://img.shields.io/badge/arXiv-ReactiveGWM-A42C25.svg" alt="arXiv"></a>
+<a href="https://arxiv.org/abs/2605.15256"><img src="https://img.shields.io/badge/arXiv-ReactiveGWM-A42C25.svg" alt="arXiv"></a>
 <a href="https://huggingface.co/INV-WZQ/ReactiveGWM-Models"><img src="https://img.shields.io/badge/🤗_HuggingFace-Model-ffbd45.svg" alt="HuggingFace Model"></a>
 <a href="https://huggingface.co/datasets/INV-WZQ/ReactiveGWM-Datasets"><img src="https://img.shields.io/badge/🤗_HuggingFace-Dataset-ffbd45.svg" alt="HuggingFace Dataset"></a>
 
@@ -22,6 +22,7 @@
 > <sup>4</sup> The Hong Kong University of Science and Technology (Guangzhou), <sup>5</sup> University of Chinese Academy of Sciences, <sup>6</sup> The Hong Kong University of Science and Technology
 
 ## ⭐ Updates
+- **[May 18, 2026]**: Arxiv paper is released.
 - **[May 14, 2026]**: Inference Code, model and dataset are released.
 
 ## 📚 Introduction
@@ -95,4 +96,13 @@ ReactiveGWM is built on top of [Wan2.2-TI2V-5B](https://github.com/Wan-Video/Wan
 
 ## 🔗 Citation
 ```
+@misc{wang2026reactivegwmsteeringnpcreactive,
+      title={ReactiveGWM: Steering NPC in Reactive Game World Models}, 
+      author={Zeqing Wang and Danze Chen and Zhaohu Xing and Zizhao Tong and Yinhan Zhang and Xingyi Yang and Yeying Jin},
+      year={2026},
+      eprint={2605.15256},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2605.15256}, 
+}
 ```

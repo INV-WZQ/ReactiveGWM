@@ -10,8 +10,8 @@ Supported modes (mutually compatible):
   A. Full DiT fine-tune        : --trainable_models dit
   B1. Scoped (keep cross_attn) : --trainable_models dit --trainable_filter cross_attn
   B2. Scoped (drop cross_attn) : --trainable_models dit --trainable_filter_exclude cross_attn
-  C. LoRA on cross_attn+self_attn:
-        --lora_base_model dit --lora_target_modules cross_attn,self_attn --lora_rank 32
+  C. LoRA on attention projections:
+        --lora_base_model dit --lora_target_modules q,k,v,o --lora_rank 32
   + cache acceleration         : add --use_cached_dataset --cache_root <path>
 
 Cold-start: the per-block ActionModule keys stay at their default (zero / xavier)
@@ -392,6 +392,10 @@ def build_parser():
                         "accelerator.save_state() to <output>/state-<step>/ "
                         "alongside the existing step-<step>.safetensors. "
                         "Enables seamless --resume_state.")
+    p.add_argument("--max_train_steps", type=int, default=None,
+                   help="Stop after this many training steps, counted the same "
+                        "way as --save_steps and step-<N>.safetensors. If not "
+                        "set, training runs for --num_epochs.")
     p.add_argument("--resume_state", type=str, default=None,
                    help="Path to a state-<N>/ directory written by "
                         "--save_full_state. Loaded via accelerator.load_state() "
@@ -448,6 +452,8 @@ if __name__ == "__main__":
     # Resolve profile-defaulted flags now that we know the game.
     if args.use_csv_prompt is None:
         args.use_csv_prompt = profile.default_use_csv_prompt
+    if args.max_train_steps is not None and args.max_train_steps <= 0:
+        raise SystemExit("--max_train_steps must be a positive integer when set.")
     if args.resume_state and args.resume_from_ckpt:
         raise SystemExit(
             "--resume_state and --resume_from_ckpt are mutually exclusive: "

@@ -22,6 +22,7 @@
 > <sup>4</sup> The Hong Kong University of Science and Technology (Guangzhou), <sup>5</sup> University of Chinese Academy of Sciences, <sup>6</sup> The Hong Kong University of Science and Technology
 
 ## ⭐ Updates
+- **[Jun 16, 2026]**: Causal Forcing training code is released, covering the `ar_tf`, `cd`, and `dmd` three-stage workflow.
 - **[Jun 11, 2026]**: Bidirectional training code and documentation are released, covering bidirectional full DiT fine-tuning, LoRA fine-tuning, scoped module fine-tuning, and cached dataset precompute.
 - **[May 18, 2026]**: Arxiv paper is released.
 - **[May 14, 2026]**: Inference Code, model and dataset are released.
@@ -94,12 +95,14 @@ the per-strategy example inventory, see [**`inference/README.md`**](inference/RE
 
 ## 🏋️ Training
 
-Bidirectional training code is available under [`training/`](training). It covers ordinary bidirectional training for SF2/SF3, including:
+Training code is available under [`training/`](training). It covers ordinary bidirectional training for SF2/SF3, including:
 
 - full DiT fine-tuning;
 - LoRA fine-tuning;
 - scoped module fine-tuning via `--trainable_filter` / `--trainable_filter_exclude`;
 - optional VAE/T5 cache precompute and cached-dataset training.
+
+It also includes Causal Forcing training with the three-stage `ar_tf`, `cd`, and `dmd` workflow.
 
 Training uses the local `DiffSynth-Studio/diffsynth` package as the underlying training framework. Install the inference requirements plus the training extras, then expose the project parent and DiffSynth-Studio on `PYTHONPATH`:
 
@@ -114,12 +117,13 @@ Validate the bidirectional entrypoints with:
 ```bash
 python -m ReactiveGWM_Code.training.bidirectional.train --help
 python -m ReactiveGWM_Code.training.bidirectional.precompute_cache --help
+python -m ReactiveGWM_Code.training.causal_forcing.train --help
 ```
 
-For full command examples and cache usage, see [**`training/README.md`**](training/README.md). Causal Forcing training is not included in this bidirectional release.
+For full command examples, cache usage, and Causal Forcing stage commands, see [**`training/README.md`**](training/README.md).
 
 ## 🤓 Acknowledgments
-ReactiveGWM is built on top of [Wan2.2-TI2V-5B](https://github.com/Wan-Video/Wan2.2) and adapts modeling / scheduler components from [DiffSynth-Studio](https://github.com/modelscope/DiffSynth-Studio). Gameplay recording uses the [stable-retro](https://github.com/Farama-Foundation/stable-retro) framework, and NPC strategy annotations are produced by [Gemini](https://deepmind.google/technologies/gemini/). We extend our gratitude to the open-source community for their valuable contributions!
+ReactiveGWM is built on top of [Wan2.2-TI2V-5B](https://github.com/Wan-Video/Wan2.2) and adapts modeling / scheduler components from [DiffSynth-Studio](https://github.com/modelscope/DiffSynth-Studio). The Causal Forcing training workflow builds on ideas from [thu-ml/Causal-Forcing](https://github.com/thu-ml/Causal-Forcing). Gameplay recording uses the [stable-retro](https://github.com/Farama-Foundation/stable-retro) framework, and NPC strategy annotations are produced by [Gemini](https://deepmind.google/technologies/gemini/). We extend our gratitude to the open-source community for their valuable contributions!
 
 ## 🔗 Citation
 ```

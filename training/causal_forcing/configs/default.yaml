@@ -1,0 +1,87 @@
+# ReactiveGWM Causal Forcing — 三阶段共享默认配置
+# 各 stage yaml 浅合并覆盖；环境变量可覆盖常用路径：
+# BASE_CKPT / WAN_BASE_DIR / TOKENIZER_DIR / DATA_ROOT / METADATA_PATH / OUT /
+# STUDENT_INIT / TEACHER_CKPT。
+
+# ----------------------------------------------------------------- 路径
+base_ckpt:        <path-to-reactivegwm-base-ckpt>
+wan_base_dir:     <path-to-Wan2.2-TI2V-5B>
+tokenizer_dir:    <path-to-Wan2.1-T2V-1.3B/google/umt5-xxl>
+dataset_base:     <path-to-dataset-root>
+metadata_path:    <path-to-dataset-root>/metadata.csv
+game: sf3
+use_csv_prompt: true
+prompt_column: prompt
+
+# ----------------------------------------------------------------- 几何 (SF3 profile)
+height: 480
+width: 832
+num_frames: 101
+action_hold_window: 10
+
+# ----------------------------------------------------------------- flow-match 调度 / 因果粒度
+denoising_step_list: [1000, 750, 500, 250]   # Stage 3 4-step; warp+shift=5.0 → t=[1,0.9375,0.8333,0.625] = CF++ 论文 4-step (逐点等价)
+num_train_timestep: 1000
+timestep_shift: 5.0            # 从 Stage 1 起即用 (FlowMatch scheduler shift)
+num_frame_per_block: 1         # 从 Stage 1 起即用 (因果块粒度, =1 逐帧)
+
+# ----------------------------------------------------------------- Stage 1 AR-TF
+# 对齐 CF 上游: 逐帧独立 timestep (uniform_timestep=False) + 全 [0,1000) 范围采样.
+ar_uniform_timestep: false     # 逐帧独立 (CF 上游 model/diffusion.py uniform_timestep=False)
+# ar_min_step / ar_max_step 已弃用: 上游 generator_loss 用全 [0,1000) 范围, 不截断.
+ar_first_frame_anchor: true    # 决策 7 (I2V: 首帧 anchor, loss 排除)
+
+# ----------------------------------------------------------------- Stage 2 CD (CF++)
+cd_discrete_N: 48
+cd_guidance_scale: 3.0
+cd_ema_decay: 0.99
+cd_ema_start_step: 200
+
+# ----------------------------------------------------------------- Stage 3 DMD (CF 上游 v2)
+# 字段名沿用本项目习惯；注释标注「上游行为」or「项目适配」。
+dmd_score_frames: 26            # DMD 窗口=26 帧 (frame0 GT anchor 不算 loss + 25 生成); 上游变长 rollout→last-21, 本项目定长 26 (review §3.5)
+context_noise: 0
+same_step_across_blocks: true   # 上游默认 True (False 分支 "Useless, never met" + 会断 DMD timestep 推导) (review §4.2)
+last_step_only: false
+stochastic_exit_step: true      # 上游行为: per-block 随机 exit denoising step (DMD2 backward sim) (review §3.4)
+detach_history_kv: true         # 上游行为: 中间 step + context-cache 更新走 no_grad (review §3.2/§3.4)
+holistic_dmd: true              # 项目名 = 上游默认行为 (整段单 uniform timestep score; 上游无此 flag 名) (review §3.2)
+independent_first_frame: false
+ts_schedule: false              # 对齐上游 framewise yaml (review §4.4)
+denoising_loss_type: flow       # critic x0→flow 后算 flow-matching denoising loss (review §4.5)
+real_guidance_scale: 3.0
+fake_guidance_scale: 0.0
+dmd_timestep_clamp: [20, 980]   # DMD score / critic timestep: uniform → shift 5.0 → clamp (review §4.3)
+dfake_gen_update_ratio: 5
+beta1_critic: 0.0               # critic AdamW (review §6.6)
+beta2_critic: 0.999
+dmd_ema_decay: 0.99
+dmd_ema_start_step: 200         # EMA 仅导出用: 上游式懒创建 (step<200 不跟踪) + 只在 generator step 更新 (review §4.1)
+# 模型 KV-cache 滑窗 (推理 / Stage 3 rollout); Stage 1/2 模型 init 也读它 (ar_tf.py/cd.py).
+# 注: Stage 3 训练 rollout 有独立 dmd_train_kv_window / dmd_train_sink。
+kv_window_size: 16
+kv_sink_size: 2
+# —— 以下为「项目适配」候选 (上游无对应物), 待显存实测后定, 引入务必标注非上游 ——
+# max_context_frames: 7         # 上游无 (项目 KV-window 适配? 待定)
+# grad_horizon: 8               # ✗ 上游无: 梯度是 per-block exit-step + 窗口 mask, 不是"最后 N 帧" (review §3.4)
+# max_dmd_frames: 4             # 上游无: critic 整窗一次 backward (review §3.6); 显存适配候选
+# critic_update_mode: per_frame_backward  # 上游无: 同上, 显存适配候选 (review §3.6)
+
+# ----------------------------------------------------------------- 优化
+# 对齐 CF 上游: lr=2e-6, beta1=0.0, beta2=0.999, weight_decay=0.01, grad_clip=10.
+lr: 2.0e-6
+lr_critic: 4.0e-7
+weight_decay: 0.01             # CF 上游 default_config.yaml (Stage 1/2/3 共用)
+beta1: 0.0                     # Stage 3 generator / critic
+beta2: 0.999
+ar_beta1: 0.0                  # Stage 1 / 2 (CF 上游 ar_diffusion_tf_framewise.yaml beta1=0.0)
+ar_beta2: 0.999
+ar_grad_clip: 10.0
+
+# ----------------------------------------------------------------- 训练循环
+seed: 42
+dataset_repeat: 100
+dataset_num_workers: 2
+gradient_accumulation_steps: 1
+mixed_precision: bf16
+gradient_checkpointing: true

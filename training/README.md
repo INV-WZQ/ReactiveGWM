@@ -1,6 +1,6 @@
-# ReactiveGWM 训练说明（阶段一）
+# ReactiveGWM 训练说明
 
-本目录目前只包含阶段一：普通双向训练（bidirectional training）。Causal Forcing 训练尚未迁移到这里。
+本目录包含普通双向训练（bidirectional training）和 Causal Forcing 三阶段训练。
 
 ## 依赖
 
@@ -24,6 +24,7 @@ export PYTHONPATH=/path/to/ReactiveGWM/DiffSynth-Studio:/path/to/ReactiveGWM:${P
 python -m compileall ReactiveGWM_Code/training/data ReactiveGWM_Code/training/bidirectional
 python -m ReactiveGWM_Code.training.bidirectional.train --help
 python -m ReactiveGWM_Code.training.bidirectional.precompute_cache --help
+python -m ReactiveGWM_Code.training.causal_forcing.train --help
 ```
 
 也支持从 `ReactiveGWM_Code/` 目录内直接运行脚本：
@@ -31,6 +32,7 @@ python -m ReactiveGWM_Code.training.bidirectional.precompute_cache --help
 ```bash
 python training/bidirectional/train.py --help
 python training/bidirectional/precompute_cache.py --help
+python training/causal_forcing/train.py --help
 ```
 
 ## 普通双向训练
@@ -225,9 +227,75 @@ python -m ReactiveGWM_Code.training.bidirectional.precompute_cache \
 
 `precompute_cache.py` 和 `bidirectional/cached_dataset.py` 的 cache key 逻辑必须保持一致；修改其中一个时需要同步检查另一个。
 
+## Causal Forcing 三阶段训练
+
+入口：
+
+```bash
+python -m ReactiveGWM_Code.training.causal_forcing.train
+```
+
+配置文件位于 `training/causal_forcing/configs/`。`default.yaml` 提供共享超参，stage yaml 只覆盖阶段差异。常用路径可以通过环境变量覆盖：
+
+```bash
+BASE_CKPT=<base-or-bidirectional-ckpt>
+WAN_BASE_DIR=<Wan2.2-TI2V-5B-dir>
+TOKENIZER_DIR=<Wan2.1-T2V-1.3B/google/umt5-xxl-dir>
+DATA_ROOT=<dataset-root>
+METADATA_PATH=<metadata.csv>
+OUT=<output-dir>
+STUDENT_INIT=<previous-stage-ckpt>
+TEACHER_CKPT=<stage1-teacher-ckpt>
+```
+
+Stage 1 AR-TF：
+
+```bash
+BASE_CKPT=<base-or-bidirectional-ckpt> \
+WAN_BASE_DIR=<Wan2.2-TI2V-5B-dir> \
+TOKENIZER_DIR=<Wan2.1-T2V-1.3B/google/umt5-xxl-dir> \
+DATA_ROOT=<dataset-root> \
+OUT=<output-stage1> \
+accelerate launch --num_processes 8 --multi_gpu \
+  -m ReactiveGWM_Code.training.causal_forcing.train \
+  --stage ar_tf \
+  --config ReactiveGWM_Code/training/causal_forcing/configs/stage1_ar.yaml
+```
+
+Stage 2 CD：
+
+```bash
+WAN_BASE_DIR=<Wan2.2-TI2V-5B-dir> \
+TOKENIZER_DIR=<Wan2.1-T2V-1.3B/google/umt5-xxl-dir> \
+STUDENT_INIT=<stage1-step.safetensors> \
+DATA_ROOT=<dataset-root> \
+OUT=<output-stage2> \
+accelerate launch --num_processes 8 --multi_gpu \
+  -m ReactiveGWM_Code.training.causal_forcing.train \
+  --stage cd \
+  --config ReactiveGWM_Code/training/causal_forcing/configs/stage2_cd.yaml
+```
+
+Stage 3 DMD：
+
+```bash
+BASE_CKPT=<base-or-bidirectional-ckpt> \
+WAN_BASE_DIR=<Wan2.2-TI2V-5B-dir> \
+TOKENIZER_DIR=<Wan2.1-T2V-1.3B/google/umt5-xxl-dir> \
+STUDENT_INIT=<stage2-step.safetensors> \
+DATA_ROOT=<dataset-root> \
+OUT=<output-stage3> \
+accelerate launch --num_processes 8 --multi_gpu \
+  -m ReactiveGWM_Code.training.causal_forcing.train \
+  --stage dmd \
+  --config ReactiveGWM_Code/training/causal_forcing/configs/stage3_dmd.yaml
+```
+
+Causal Forcing 训练只保存训练 checkpoint、EMA / critic 导出和 `accelerator.save_state` resume state；不会在训练保存点自动启动推理采样。
+
 ## Resume
 
-阶段一训练入口支持两类恢复方式：
+普通双向训练入口支持两类恢复方式：
 
 - `--resume_from_ckpt <step.safetensors>`：加载已保存的 DiT 权重，不恢复 optimizer / LR / RNG / dataloader 状态。
 - `--save_full_state` + `--resume_state <state-dir>`：使用 `accelerator.save_state/load_state` 恢复完整训练状态。
@@ -235,3 +303,5 @@ python -m ReactiveGWM_Code.training.bidirectional.precompute_cache \
 二者互斥。
 
 当 `--resume_state` 指向 `state-N` 目录时，训练 step 计数会从 `N` 继续；因此 `--max_train_steps 30000` 表示训练到全局 step 30000，而不是在 resume 后再额外训练 30000 step。
+
+Causal Forcing 的三个 stage 都支持 `--resume_state <state-N>`；Stage 2/3 的 EMA state 会随 `state-N` 目录额外保存并在 resume 时手动恢复。

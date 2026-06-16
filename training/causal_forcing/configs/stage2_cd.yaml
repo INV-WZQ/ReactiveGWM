@@ -1,0 +1,22 @@
+# Stage 2 Causal Consistency Distillation (CF++).
+# 路径可用 STUDENT_INIT / TEACHER_CKPT / DATA_ROOT / OUT 覆盖。
+stage: cd
+
+max_steps: 50000
+save_steps: 2500
+
+# 4 ranks x grad_accum 1 = global batch 4.
+gradient_accumulation_steps: 1
+
+# Stage 1 产物作 student-init + teacher (teacher 默认 = student_init).
+student_init: <path-to-stage1-ar-ckpt>
+
+output_path: outputs/causal_forcing/stage2_cd
+
+# CD 超参 (default.yaml 已有, 这里显式重申).
+cd_discrete_N: 48
+cd_guidance_scale: 3.0
+cd_ema_decay: 0.99
+cd_ema_start_step: 200
+# fp32 EMA shadow 默认放 CPU；显存充足且想减少 CPU<->GPU 传输时可改 cuda。
+cd_ema_shadow_device: cpu

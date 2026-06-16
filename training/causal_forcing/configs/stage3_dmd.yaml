@@ -1,0 +1,65 @@
+# Stage 3 Asymmetric DMD self-forcing (CF 上游 v2) — 仅覆盖差异项.
+# 路径可用 BASE_CKPT / STUDENT_INIT / DATA_ROOT / OUT 覆盖。
+# Stage 3 runner 固定 grad_accum=1，全局 batch = 进程数。
+stage: dmd
+mixed_precision: "no"  # FSDP FULL_SHARD/NO_WRAP 下禁用 fp32 master；模型本体仍 bf16，避免额外 ~16GB/rank
+
+max_steps: 50000     # 上限；建议结合离线评估早停。
+save_steps: 200      # checkpoint 默认全部保留；可用 dmd_keep_last_ckpts 控制保留数量。
+
+# generator 从 Stage 2 CD 产物起步；teacher/critic 从 base_ckpt 起步。
+student_init: <path-to-stage2-cd-ckpt>
+
+output_path: outputs/causal_forcing/stage3_dmd
+
+# DMD 4-step + 双向 score (default.yaml 已有大部分; 这里显式重申关键项).
+dmd_score_frames: 26
+
+# CF++ long-tail DMD: 长程 rollout 到 L，只对末尾 26 latent frames 做 DMD / critic loss。
+dmd_long_rollout: true
+dmd_rollout_min_frames: 26
+dmd_rollout_max_frames: 101
+dmd_rollout_force_max_prob: 0.3
+
+# action continuation: 真实 101-frame prefix 不够时，用合法 action preset chunks 补齐。
+dmd_random_action_extend: true
+dmd_action_extend_mode: preset_chunks
+dmd_action_chunk_frames: 10
+dmd_random_action_neutral_prob: 0.3
+dmd_random_action_direction_prob: 0.4
+
+# tail frame0 re-anchor: 只 decode tail anchor 附近短 latent chunk，不 decode 整个 prefix。
+dmd_tail_reanchor: vae
+dmd_reanchor_decode_latents: 5
+
+same_step_across_blocks: true
+ts_schedule: false
+denoising_loss_type: flow
+real_guidance_scale: 3.0
+fake_guidance_scale: 0.0
+dmd_timestep_clamp: [20, 980]
+dfake_gen_update_ratio: 5
+lr: 2.0e-6
+lr_critic: 4.0e-7
+beta1: 0.0
+beta2: 0.999
+beta1_critic: 0.0
+beta2_critic: 0.999
+dmd_ema_decay: 0.99
+dmd_ema_start_step: 200
+
+# 训练 rollout: 对齐长视频推理的 sink+recent cache；保留前 2 帧 + 最近 16 帧。
+dmd_train_kv_window: 16
+dmd_train_sink: 2
+
+# EMA fp32 shadow 默认放 CPU: Stage 3 EMA 每 5 步才更新 (只在 generator step), CPU↔GPU
+# 传输成本被摊薄, 换 ~20GB VRAM (3×5B 同驻显存紧). 显存够+想提速可改 cuda.
+dmd_ema_shadow_device: cpu
+
+# 是否在每个 phase 后释放 cache；显存碎片或共享机器上可按实际情况调整。
+dmd_empty_cache_each_phase: false
+dmd_gc_interval: 0
+# checkpoint 默认全部保留；如需防爆盘, 手动设为正数只保留最近 N 个 state-N / step-N。
+dmd_keep_last_ckpts: 0
+# 冻结 teacher 仅 generator loss 打分使用；CPU offload 不改数学，释放 critic/backward 的 ~10GB VRAM。
+dmd_teacher_offload_cpu: true

@@ -1,0 +1,11 @@
+# Stage 1 AR-TF.
+# 路径可用 BASE_CKPT / WAN_BASE_DIR / TOKENIZER_DIR / DATA_ROOT / OUT 覆盖。
+stage: ar_tf
+
+max_steps: 100000
+save_steps: 2000
+
+# 4 ranks x grad_accum 2 = global batch 8.
+gradient_accumulation_steps: 2
+
+output_path: outputs/causal_forcing/stage1_ar

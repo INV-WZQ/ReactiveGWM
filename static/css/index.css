@@ -288,3 +288,57 @@ body {
   #gallery .method-badge { font-size: 0.9rem; }
 }
 
+/* Language switch */
+.hero-banner {
+  position: relative;
+}
+
+.language-switcher {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.5rem;
+  z-index: 5;
+}
+
+.language-toggle {
+  min-width: 5.4rem;
+  border: 1px solid #dbe4f0;
+  background: rgba(255, 255, 255, 0.92);
+  color: #1e3a5f;
+  font-weight: 700;
+  box-shadow: 0 5px 16px rgba(15, 23, 42, 0.09);
+  backdrop-filter: blur(8px);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.language-toggle:hover,
+.language-toggle:focus-visible {
+  border-color: #93b4e5;
+  color: #1d4ed8;
+  box-shadow: 0 7px 20px rgba(37, 99, 235, 0.16);
+  transform: translateY(-1px);
+}
+
+html[lang="zh-CN"] body {
+  font-family: 'Noto Sans', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+html[lang="zh-CN"] .method-videos-grid > .video-row:nth-child(1) .video-analysis-box::after {
+  content: '未遵循策略';
+}
+
+html[lang="zh-CN"] .method-videos-grid > .video-row:nth-child(2) .video-analysis-box::after,
+html[lang="zh-CN"] .method-videos-grid > .video-row:nth-child(3) .video-analysis-box::after {
+  content: 'NPC 遵循策略';
+}
+
+@media (max-width: 768px) {
+  .language-switcher {
+    top: 0.75rem;
+    right: 0.75rem;
+  }
+
+  .language-toggle {
+    min-width: 4.8rem;
+  }
+}

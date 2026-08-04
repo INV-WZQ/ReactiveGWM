@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <!-- Meta tags for social media banners, these should be filled in appropriatly as they are your "business card" -->
@@ -43,6 +43,16 @@
 <body>
 
   <section class="hero hero-banner">
+    <div class="language-switcher">
+      <button
+        id="language-toggle"
+        class="button is-small is-rounded language-toggle"
+        type="button"
+        aria-label="Switch to Chinese"
+        aria-pressed="false">
+        中文
+      </button>
+    </div>
     <div class="hero-body">
       <div class="container is-max-desktop">
         <div class="columns is-centered">
@@ -2147,8 +2157,17 @@ body {
               const currentCard = videoEl.closest('.method-video');
               if (currentCard) currentCard.classList.add('selected');
 
-              promptMeta.textContent = `💡 Selected: ${asset.id} · ${scenario} · ${method}`;
-              promptContent.textContent = 'Loading prompt...';
+              promptMeta.dataset.selectedId = asset.id;
+              promptMeta.dataset.selectedScenario = scenario;
+              promptMeta.dataset.selectedMethod = method;
+              promptMeta.textContent = window.pageLanguage
+                ? window.pageLanguage.formatSelection(asset.id, scenario, method)
+                : `💡 Selected: ${asset.id} · ${scenario} · ${method}`;
+
+              promptContent.dataset.state = 'loading';
+              promptContent.textContent = window.pageLanguage
+                ? window.pageLanguage.getMessage('loadingPrompt')
+                : 'Loading prompt...';
 
               try {
                 if (!promptCache.has(asset.prompt)) {
@@ -2157,9 +2176,18 @@ body {
                   const text = await resp.text();
                   promptCache.set(asset.prompt, text.trim());
                 }
-                promptContent.textContent = promptCache.get(asset.prompt) || 'Prompt is empty.';
+                const rawPrompt = promptCache.get(asset.prompt) || '';
+                promptContent.dataset.state = rawPrompt ? 'prompt' : 'emptyPrompt';
+                promptContent.dataset.rawPrompt = rawPrompt;
+                promptContent.textContent = rawPrompt
+                  ? (window.pageLanguage ? window.pageLanguage.localizePrompt(rawPrompt) : rawPrompt)
+                  : (window.pageLanguage ? window.pageLanguage.getMessage('promptEmpty') : 'Prompt is empty.');
               } catch (e) {
-                promptContent.textContent = `Failed to load prompt from: ${asset.prompt}`;
+                promptContent.dataset.state = 'error';
+                promptContent.dataset.promptPath = asset.prompt;
+                promptContent.textContent = window.pageLanguage
+                  ? window.pageLanguage.formatPromptError(asset.prompt)
+                  : `Failed to load prompt from: ${asset.prompt}`;
               }
             });
           });
@@ -2179,22 +2207,29 @@ body {
 
         try {
           await navigator.clipboard.writeText(contentEl.textContent || '');
-          const oldText = btn.textContent;
-          btn.textContent = 'Copied';
+          btn.textContent = window.pageLanguage
+            ? window.pageLanguage.getMessage('copied')
+            : 'Copied';
           setTimeout(() => {
-            btn.textContent = oldText;
+            btn.textContent = window.pageLanguage
+              ? window.pageLanguage.getMessage('copyPrompt')
+              : 'Copy Prompt';
           }, 1200);
         } catch (e) {
-          const oldText = btn.textContent;
-          btn.textContent = 'Copy Failed';
+          btn.textContent = window.pageLanguage
+            ? window.pageLanguage.getMessage('copyFailed')
+            : 'Copy Failed';
           setTimeout(() => {
-            btn.textContent = oldText;
+            btn.textContent = window.pageLanguage
+              ? window.pageLanguage.getMessage('copyPrompt')
+              : 'Copy Prompt';
           }, 1200);
         }
       });
     });
   });
 </script>
+<script src="static/js/language.js"></script>
 
 </body>
 </html>

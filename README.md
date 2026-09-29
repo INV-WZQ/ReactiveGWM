@@ -1,19 +1,10 @@
 # ReactiveGWM v2: Flexible Control and NPC Reactivity in Game World Models
 
-<<<<<<< HEAD
 <a href="https://inv-wzq.github.io/ReactiveGWM/"><img src="https://img.shields.io/badge/Web-Project Page-1d72b8.svg" alt="Project Page"></a>
 <a href="https://arxiv.org/abs/2605.15256"><img src="https://img.shields.io/badge/arXiv-ReactiveGWM-A42C25.svg" alt="arXiv"></a>
 <a href="https://huggingface.co/INV-WZQ/ReactiveGWM-v2-Models"><img src="https://img.shields.io/badge/🤗_HuggingFace-Model-ffbd45.svg" alt="HuggingFace Model"></a>
 <a href="https://huggingface.co/datasets/INV-WZQ/ReactiveGWM-v2-Datasets"><img src="https://img.shields.io/badge/🤗_HuggingFace-Dataset-ffbd45.svg" alt="HuggingFace Dataset"></a>
 
-=======
-<p align="center">
-  <a href="https://inv-wzq.github.io/ReactiveGWM/"><img src="https://img.shields.io/badge/Web-Project%20Page-1d72b8.svg" alt="Project Page"></a>
-  <a href="https://huggingface.co/INV-WZQ/ReactiveGWM-v2-Models"><img src="https://img.shields.io/badge/Hugging%20Face-v2%20Models-ffbd45.svg?logo=huggingface" alt="Hugging Face v2 Models"></a>
-  <a href="https://huggingface.co/datasets/INV-WZQ/ReactiveGWM-v2-Datasets"><img src="https://img.shields.io/badge/Hugging%20Face-v2%20Datasets-ffbd45.svg?logo=huggingface" alt="Hugging Face v2 Datasets"></a>
-  <a href="https://github.com/INV-WZQ/ReactiveGWM/tree/v1"><img src="https://img.shields.io/badge/v1-Code%20%26%20Paper-64748b.svg?logo=github" alt="v1 Code and Paper"></a>
-</p>
->>>>>>> 740c7e5 (Polish README headings and add v2 method overview)
 
 > [Zeqing Wang](https://inv-wzq.github.io/)<sup>12</sup>, Danze Chen<sup>12</sup>, [Zhaohu Xing](https://ge-xing.github.io/)<sup>4</sup> , Zizhao Tong<sup>15</sup> , Yinhan Zhang<sup>16</sup> , [Xingyi Yang](https://adamdad.github.io/)<sup>3</sup> , [Yeying Jin](https://jinyeying.github.io/)<sup>12</sup>  
 > <sup>1</sup> Tencent, <sup>2</sup> National University of Singapore, <sup>3</sup> The Hong Kong Polytechnic University  
@@ -36,22 +27,13 @@ Unified Agency Conditioning binds each character's external action sequence or
 conditional NPC rule to the same handle. Causal self-attention lets characters
 respond to the current and preceding video context.
 
-<<<<<<< HEAD
-## Setup
-=======
 <p align="center">
   <img src="assets/method.png" width="100%" alt="ReactiveGWM v2 method: Spatial Role Binding, Unified Agency Conditioning, and causal self-attention">
   <br>
   <em>ReactiveGWM v2 combines character-specific spatial binding and agency conditioning with causal video context.</em>
 </p>
 
-A rollout takes an initial image, one mask per character, and per-character
-controls. The default output is 101 frames at 20 FPS and 832 x 480 resolution,
-with 25 external-action intervals. HNM supports two to six characters; SF3 models
-two-fighter interactions. Roles and NPC rules are fixed within a rollout.
-
 ## 🛠️ Setup
->>>>>>> 740c7e5 (Polish README headings and add v2 method overview)
 
 Python 3.12 and a CUDA GPU are recommended. Install from this repository's root:
 

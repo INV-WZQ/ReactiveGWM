@@ -1,10 +1,19 @@
 # ReactiveGWM v2: Flexible Control and NPC Reactivity in Game World Models
 
+<<<<<<< HEAD
 <a href="https://inv-wzq.github.io/ReactiveGWM/"><img src="https://img.shields.io/badge/Web-Project Page-1d72b8.svg" alt="Project Page"></a>
 <a href="https://arxiv.org/abs/2605.15256"><img src="https://img.shields.io/badge/arXiv-ReactiveGWM-A42C25.svg" alt="arXiv"></a>
 <a href="https://huggingface.co/INV-WZQ/ReactiveGWM-v2-Models"><img src="https://img.shields.io/badge/🤗_HuggingFace-Model-ffbd45.svg" alt="HuggingFace Model"></a>
 <a href="https://huggingface.co/datasets/INV-WZQ/ReactiveGWM-v2-Datasets"><img src="https://img.shields.io/badge/🤗_HuggingFace-Dataset-ffbd45.svg" alt="HuggingFace Dataset"></a>
 
+=======
+<p align="center">
+  <a href="https://inv-wzq.github.io/ReactiveGWM/"><img src="https://img.shields.io/badge/Web-Project%20Page-1d72b8.svg" alt="Project Page"></a>
+  <a href="https://huggingface.co/INV-WZQ/ReactiveGWM-v2-Models"><img src="https://img.shields.io/badge/Hugging%20Face-v2%20Models-ffbd45.svg?logo=huggingface" alt="Hugging Face v2 Models"></a>
+  <a href="https://huggingface.co/datasets/INV-WZQ/ReactiveGWM-v2-Datasets"><img src="https://img.shields.io/badge/Hugging%20Face-v2%20Datasets-ffbd45.svg?logo=huggingface" alt="Hugging Face v2 Datasets"></a>
+  <a href="https://github.com/INV-WZQ/ReactiveGWM/tree/v1"><img src="https://img.shields.io/badge/v1-Code%20%26%20Paper-64748b.svg?logo=github" alt="v1 Code and Paper"></a>
+</p>
+>>>>>>> 740c7e5 (Polish README headings and add v2 method overview)
 
 > [Zeqing Wang](https://inv-wzq.github.io/)<sup>12</sup>, Danze Chen<sup>12</sup>, [Zhaohu Xing](https://ge-xing.github.io/)<sup>4</sup> , Zizhao Tong<sup>15</sup> , Yinhan Zhang<sup>16</sup> , [Xingyi Yang](https://adamdad.github.io/)<sup>3</sup> , [Yeying Jin](https://jinyeying.github.io/)<sup>12</sup>  
 > <sup>1</sup> Tencent, <sup>2</sup> National University of Singapore, <sup>3</sup> The Hong Kong Polytechnic University  
@@ -15,7 +24,11 @@ training and inference code. The original SF2 / Street Fighter Alpha 3 release,
 including its bidirectional and Causal Forcing training, is preserved on `v1`.
 The project website remains on the unchanged `page` branch.
 
-## Introduction
+## ⭐ Updates
+
+- **[Sep 29, 2026]**: v2 HNM and SF3 training and inference code is released, with Hugging Face model/data support, custom character controls, and role reassignment. The original release remains available on the [v1 branch](https://github.com/INV-WZQ/ReactiveGWM/tree/v1).
+
+## 📚 Introduction
 
 ReactiveGWM assigns control roles to individual characters at rollout initialization.
 Spatial Role Binding grounds learned handles in initial-frame instance masks.
@@ -23,7 +36,22 @@ Unified Agency Conditioning binds each character's external action sequence or
 conditional NPC rule to the same handle. Causal self-attention lets characters
 respond to the current and preceding video context.
 
+<<<<<<< HEAD
 ## Setup
+=======
+<p align="center">
+  <img src="assets/method.png" width="100%" alt="ReactiveGWM v2 method: Spatial Role Binding, Unified Agency Conditioning, and causal self-attention">
+  <br>
+  <em>ReactiveGWM v2 combines character-specific spatial binding and agency conditioning with causal video context.</em>
+</p>
+
+A rollout takes an initial image, one mask per character, and per-character
+controls. The default output is 101 frames at 20 FPS and 832 x 480 resolution,
+with 25 external-action intervals. HNM supports two to six characters; SF3 models
+two-fighter interactions. Roles and NPC rules are fixed within a rollout.
+
+## 🛠️ Setup
+>>>>>>> 740c7e5 (Polish README headings and add v2 method overview)
 
 Python 3.12 and a CUDA GPU are recommended. Install from this repository's root:
 
@@ -36,7 +64,7 @@ pip install -e .
 The package includes the shared model and data adapters and pins the reference
 DiffSynth dependency. No separate DiffSynth checkout is needed.
 
-## Quick start
+## 🚀 Quick start
 
 Prepare a small HF sample selection, download the VAE, then generate a clip:
 
@@ -63,7 +91,7 @@ assigning actions or NPC prompts to each character. See
 [inference/README.md](inference/README.md) for custom inputs, new text encoding,
 role reassignment, local checkpoints, and the Python API.
 
-## Training
+## 🏋️ Training
 
 Both game recipes default to **20,000 optimizer updates and effective batch 8**.
 Steps, batch size, gradient accumulation, learning rate, devices, and output paths
@@ -89,7 +117,7 @@ evaluation split counts because the published version excludes the extra
 perfect-block strategy. Train/val caches are provided; test inference encodes only
 the initial frame and does not read future ground-truth frames.
 
-## Layout and verification
+## 🧪 Layout and verification
 
 - `training/`: training/cache entrypoints and the two configurable recipes.
 - `inference/`: CLI, public pipeline re-export and input examples.
@@ -99,7 +127,7 @@ the initial frame and does not read future ground-truth frames.
 
 See [VERIFICATION.md](VERIFICATION.md) for actual test scope and results.
 
-## Acknowledgments and model assets
+## 🤓 Acknowledgments and model assets
 
 ReactiveGWM builds on [Wan2.2](https://github.com/Wan-Video/Wan2.2) and
 [DiffSynth-Studio](https://github.com/modelscope/DiffSynth-Studio). Downloaded

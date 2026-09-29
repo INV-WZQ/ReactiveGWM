@@ -1,24 +1,18 @@
-# Core
-torch>=2.1.0
-torchvision>=0.16.0
-numpy>=1.24
-Pillow>=9.0
-
-# Model loading & inference
-safetensors>=0.4.0
-transformers>=4.36
-einops>=0.7
-tqdm>=4.65
-
-# Text-prompt cleaning (negative prompt is bit-identical to training only with ftfy)
-ftfy>=6.1
-
-# Action parquet I/O & video writing
-pandas>=2.0
-pyarrow>=12.0
-imageio>=2.31
-imageio-ffmpeg>=0.4.9
-
-# Optional: enables Flash-Attention 2 path in models/dit.py for ~2x faster attention
-# Install only if your GPU + CUDA setup supports it
-# flash-attn>=2.5.0
+# Reference runtime: Python 3.12, CUDA, PyTorch 2.6.
+torch==2.6.0
+torchvision==0.21.0
+torchaudio==2.6.0
+diffsynth==2.0.11
+transformers==4.56.0
+accelerate==1.14.0
+peft==0.20.0
+safetensors==0.4.5
+einops==0.8.0
+numpy==1.26.4
+Pillow==11.3.0
+pyarrow==25.0.1
+av==17.1.0
+PyYAML==6.0.3
+ftfy>=6.3,<7
+sentencepiece>=0.2,<0.3
+huggingface-hub>=0.34,<1

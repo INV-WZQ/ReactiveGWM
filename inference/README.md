@@ -1,157 +1,119 @@
-# ReactiveGWM Inference
+# ReactiveGWM v2 Inference
 
-Cleanroom inference package for **ReactiveGWM**. Loads a Wan2.2-TI2V-5B
-backbone plus a ReactiveGWM SF2/SF3 DiT checkpoint, and synthesizes a
-101-frame, 20 fps gameplay video conditioned on:
+Generate an HNM or Street Fighter III: New Generation clip from its initial image,
+one mask per character, and per-character external actions or conditional NPC rules.
+The CLI and public `ReactiveGWMPipeline` share the training model implementation.
 
-- a **first frame** (the starting screen state),
-- a **button-stream parquet** (player actions, 10 Hz hold-upsampled to 20 fps),
-- a **strategy-aware NPC prompt** (Offense / Control / Defense + behaviors).
+## Install and base assets
 
-The shipped CLI [`inference.py`](inference.py) is a thin wrapper around the
-Python API in [`pipeline.py`](pipeline.py); both routes share the same defaults.
+From the repository root:
 
-## Layout
-
-```
-inference/
-├── README.md                ← you are here
-├── __init__.py              ← public-API re-exports
-├── inference.py             ← CLI entry-point (run from repo root)
-├── pipeline.py              ← SFPipeline.from_pretrained / __call__
-├── constants.py             ← variant defaults, button order, neg-prompt
-├── models/
-│   ├── __init__.py
-│   ├── dit.py               ← WanModelAction (action-conditioned DiT)
-│   ├── text_encoder.py      ← WanTextEncoder + WanTokenizer (UMT5)
-│   └── vae.py               ← WanVideoVAE38
-├── utils/
-│   ├── __init__.py
-│   ├── actions.py           ← parquet → action tensor, 10→20 fps upsample
-│   ├── image.py             ← first-frame fit/crop, mp4 writer
-│   └── scheduler.py         ← FlowMatchScheduler
-└── examples/                ← per-strategy sample inputs (12 total)
-    ├── SF2/{SF2.png, offense, control, defense}
-    └── SF3/{SF3.png, offense, control, defense}
+```bash
+pip install -e .
+hf download Wan-AI/Wan2.2-TI2V-5B Wan2.2_VAE.pth --local-dir checkpoints/base
 ```
 
-## Public Python API
+The VAE decodes generated latents and encodes uncached first frames. The published
+T5 tables cover the released actions/NPC rules; T5 weights are only needed for new
+text. To encode new text:
+
+```bash
+hf download Wan-AI/Wan2.2-TI2V-5B models_t5_umt5-xxl-enc-bf16.pth \
+  --local-dir checkpoints/base
+hf download Wan-AI/Wan2.1-T2V-1.3B --include 'google/umt5-xxl/*' \
+  --local-dir checkpoints/tokenizer
+```
+
+## Run a released sample
+
+```bash
+python scripts/prepare_hf_dataset.py --game hnm --split val --limit 1 \
+  --output data/hnm-example
+
+python inference/inference.py \
+  --checkpoint INV-WZQ/ReactiveGWM-v2-Models --model-subfolder HNM/main \
+  --data data/hnm-example/samples.csv --split val --indices 0 \
+  --vae checkpoints/base/Wan2.2_VAE.pth --gpus 0 --output outputs/hnm-example
+```
+
+For SF3, prepare `--game sf3` and select `--model-subfolder SF3/main`.
+`--checkpoint` can instead point to a downloaded directory containing
+`model.safetensors`, `config.yaml`, `metadata.json`, and `text/`.
+The configuration defaults to the checkpoint's config; `--config` explicitly
+overrides it. Game/architecture mismatches are rejected.
+
+`--sample-id ID` selects by the published sample ID instead of row position.
+`--indices 0 1` processes multiple rows in that split. Index order is the order
+in the prepared CSV. Test samples can be selected with `--split test`; no future
+video or future-video latent is read, even if present. Their first frame is
+encoded on demand, so there is no requirement to build a test VAE cache first.
+
+## Supply your own inputs or change character roles
+
+```bash
+python inference/inference.py \
+  --checkpoint checkpoints/HNM/main \
+  --image /path/to/first.png --masks /path/to/p1.png /path/to/p2.png \
+  --controls /path/to/controls.json \
+  --vae checkpoints/base/Wan2.2_VAE.pth --gpus 0 --output outputs/custom
+```
+
+Mask list order must match `controls.subjects`. Every subject supplies either
+25 action names or one NPC prompt for the default 101-frame clip. Masks identify
+physical characters; swap the action/prompt assignments to change which character
+is externally controlled. Roles and rules remain fixed during one generation.
+Use a separate generation to assign different roles.
+
+The first frame must match the configured resolution (default 832 x 480). Masks
+are reduced to soft patch coverage using the original model preprocessing. See
+[examples](examples/README.md) for complete action lists and an input generator.
+
+To override controls of an HF sample, pass `--data ... --controls controls.json`.
+This uses the sample's image and masks with the new controls. New NPC sentences
+or action names require `--text-encoder` and `--tokenizer`; new text is encoded
+without truncation, and existing cached text rows retain their original values.
+The source checkpoint/text table is never overwritten. Accepting a new sentence
+does not guarantee that a model trained on a limited action/rule distribution
+will execute it accurately.
+
+## Python API
 
 ```python
-import torch
-from PIL import Image
-from ReactiveGWM_Code.inference import SFPipeline, NEG_PROMPT, VARIANT_DEFAULTS
+from selective_agency import ReactiveGWMPipeline
 
-pipe = SFPipeline.from_pretrained(
-    base_model_dir="<base_model_dir>",
-    checkpoint_path="<path-to-ckpt.safetensors>",
-    variant="sf2",                       # or "sf3"
-    torch_dtype=torch.bfloat16,
-).to("cuda")
-
-out = pipe(
-    image=Image.open("first.png"),
-    actions_parquet="actions.parquet",
-    prompt=None,                         # None → variant default training prompt
-    negative_prompt=NEG_PROMPT,
-    num_frames=101,
-    num_inference_steps=30,
-    cfg_scale=5.0,
-    action_cfg_scale=1.0,
-    seed=2,
+pipe = ReactiveGWMPipeline.from_pretrained(
+    "INV-WZQ/ReactiveGWM-v2-Models",
+    subfolder="HNM/main",
+    device="cuda",
+    vae="checkpoints/base/Wan2.2_VAE.pth",
 )
-frames = out.frames[0]                   # list[PIL.Image], length = num_frames
+pipe.sample_csv(
+    "data/hnm-example/samples.csv", split="val", index=0,
+    output="outputs/api-sample", seed=20260808,
+)
+# Alternatively: pipe(image=..., masks=[...], controls={"subjects": [...]}, output=...)
 ```
 
-`SFPipeline` is a `torch.nn.Module`, so `.to(device)` moves the DiT, VAE,
-and T5 encoder together. `seed` is the *only* source of randomness;
-fixing it makes the (prompt, actions) → video map deterministic.
+## Parameters and output
 
-## CLI: `inference.py`
+| Argument | Default / purpose |
+|---|---|
+| `--steps` | 30 Wan flow-matching sampling steps |
+| `--sigma-shift` | 5.0 |
+| `--seed` | 20260808 |
+| `--precision` | Checkpoint precision, normally BF16 |
+| `--gpus` | Select visible physical GPU indices; inference uses one GPU |
+| `--revision` | Pin the HF checkpoint revision; the resolved commit is recorded |
+| `--hf-cache-dir` | Override model download cache |
+| `--text-cache` | Explicit replacement T5 table for custom data |
+| `--latent-only` | Skip VAE decoding; raw image inputs still need VAE encoding |
 
-```bash
-# from the repo root
-python inference/inference.py \
-    --variant sf2 --ckpt <path-to-sf2.safetensors> \
-    --image first.png --actions actions.parquet \
-    --base_model <base_model_dir> --out out.mp4
-```
+The released sampler uses CFG=1 and restores the clean first-frame latent after
+every denoising step. Sampling is full-clip generation with causal self-attention;
+this interface does not implement a streaming game engine.
 
-### Arguments
-
-| Flag | Default | Notes |
-|---|---|---|
-| `--variant` | *required* | `sf2` or `sf3`. Sets training prompt + native resolution (SF2: 480×608, SF3: 480×832). |
-| `--ckpt` | *required* | ReactiveGWM DiT `.safetensors` from [`INV-WZQ/ReactiveGWM-Models`](https://huggingface.co/INV-WZQ/ReactiveGWM-Models). |
-| `--image` | *required* | First-frame PNG/JPG. Aspect-preserving fit + center-crop to (H, W). |
-| `--actions` | *required* | Parquet with 10 button columns (`UP DOWN LEFT RIGHT Y X Z A B C`). Sampled at 10 Hz, hold-upsampled to the 20 fps video grid. |
-| `--base_model` | `/opt/dlami/.../base_model` | Directory holding Wan2.2 VAE + T5 weights + tokenizer. See layout below. |
-| `--out` | `out.mp4` | Output 20 fps MP4. |
-| `--num_frames` | `101` | Must satisfy `≡ 1 (mod 4)`; rounded up if not. |
-| `--steps` | `30` | Denoising steps. |
-| `--cfg` | `5.0` | Text-CFG (positive vs. negative prompt). |
-| `--action_cfg` | `1.0` | Action-conditional CFG. Raise above 1 to amplify the action signal. |
-| `--height`, `--width` | variant default | Rounded up to multiples of 32. |
-| `--seed` | `2` | Locked-in default (chosen visually). Override for variation sweeps. |
-| `--prompt` | variant default | Override the positive prompt. |
-| `--negative_prompt` | `constants.NEG_PROMPT` | Shared Chinese neg-prompt baked in. |
-
-### `--base_model` layout
-
-```
-<base_model_dir>/
-└── Wan-AI/
-    ├── Wan2.2-TI2V-5B/
-    │   ├── Wan2.2_VAE.pth
-    │   └── models_t5_umt5-xxl-enc-bf16.pth
-    └── Wan2.1-T2V-1.3B/
-        └── google/umt5-xxl/    # HF tokenizer files
-```
-
-## Strategy-aware NPC prompt
-
-To steer NPC behavior, pass a prompt in the training-time format:
-
-```
-NPC: Active_Behavior(<a1>: <doc>; <a2>: <doc>; …),
-     Passive_Behavior(<p1>: <doc>; <p2>: <doc>; …),
-     Strategy(<class>: <doc>)
-```
-
-with `<class> ∈ {Offense, Control, Defense}`. The cross-attention strategy
-modules ground this into NPC tactics; varying just the `Strategy(...)` slice
-(with fixed first frame + actions) is the canonical way to demonstrate
-strategy steering. Twelve ready-to-use prompts ship under `examples/`.
-
-## Examples
-
-Twelve per-strategy sample inputs (3 strategies × 2 samples × 2 variants),
-drawn from [`INV-WZQ/ReactiveGWM-Datasets`](https://huggingface.co/datasets/INV-WZQ/ReactiveGWM-Datasets).
-Each leaf `<NN>/` folder contains exactly two files:
-
-| File | CLI flag | Notes |
-|---|---|---|
-| `prompt.txt` | `--prompt` | Strategy-aware NPC prompt with `Strategy(<class>: …)`. |
-| `actions.parquet` | `--actions` | 100 rows × 10 buttons at 10 Hz. |
-
-The **first frame is shared per variant**, sitting at the variant root
-(`SF2/SF2.png`, `SF3/SF3.png`). Fixing it across all samples isolates each
-rollout to the `(prompt, actions)` pair, which makes side-by-side strategy
-comparison clean.
-
-### Running an example
-
-Assume the checkpoints and base assets have been laid out under `./models/`
-and `./base_model/` (as per the top-level [README](../README.md#-setup)).
-A complete run of `SF2/offense/01`:
-
-```bash
-python inference/inference.py \
-    --variant    sf2 \
-    --ckpt       ./models/SF2/ReactiveGWM_base.safetensors \
-    --image      inference/examples/SF2/SF2.png \
-    --actions    inference/examples/SF2/offense/01/actions.parquet \
-    --prompt     "$(cat inference/examples/SF2/offense/01/prompt.txt)" \
-    --base_model ./base_model \
-    --out        out_sf2_offense_01.mp4
-```
+CSV inference writes `sample-000000/` etc. under `--output`; custom input writes
+directly into `--output`. Each contains `latents.safetensors`, `settings.json`,
+and, unless `--latent-only` is used, `video.mp4`. Settings record the seed,
+checkpoint source, geometry, actions, NPC prompts and sampling parameters.
+Choose a new output directory for each run; existing sample outputs are not overwritten.

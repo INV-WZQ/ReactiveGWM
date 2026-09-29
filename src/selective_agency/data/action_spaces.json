@@ -1,0 +1,523 @@
+{
+  "version": "sf3_v2_roles_block12_v1",
+  "status": "defined; NPC block-boundary recipes require qualification",
+  "native_fps": 60,
+  "block_ticks": 12,
+  "press_ticks": 3,
+  "combat_buttons": [
+    "UP",
+    "DOWN",
+    "LEFT",
+    "RIGHT",
+    "A",
+    "Y",
+    "X",
+    "B",
+    "C",
+    "Z"
+  ],
+  "decision_policy": "Both roles select at source tick multiples of 12 from observed state/events at or before the boundary; execute the complete template unchanged.",
+  "template_expansion": "held keys are 1 at ticks 0..11; pulsed keys are 1 at ticks 0..2 and 0 at ticks 3..11; other keys are 0.",
+  "spaces": {
+    "player": {
+      "version": "sf3_v2_player20_block12_v1",
+      "id_policy": "Keep original IDs 0..12 and retained original-39 IDs; IDs are sparse, never index by list position.",
+      "actions": [
+        {
+          "id": 0,
+          "name": "no_op",
+          "kind": "持续",
+          "held": [],
+          "pulsed": []
+        },
+        {
+          "id": 1,
+          "name": "move_left",
+          "kind": "持续",
+          "held": [
+            "LEFT"
+          ],
+          "pulsed": []
+        },
+        {
+          "id": 2,
+          "name": "move_right",
+          "kind": "持续",
+          "held": [
+            "RIGHT"
+          ],
+          "pulsed": []
+        },
+        {
+          "id": 3,
+          "name": "jump",
+          "kind": "单点",
+          "held": [],
+          "pulsed": [
+            "UP"
+          ]
+        },
+        {
+          "id": 4,
+          "name": "crouch",
+          "kind": "持续",
+          "held": [
+            "DOWN"
+          ],
+          "pulsed": []
+        },
+        {
+          "id": 5,
+          "name": "light_punch",
+          "kind": "单点",
+          "held": [],
+          "pulsed": [
+            "A"
+          ]
+        },
+        {
+          "id": 6,
+          "name": "medium_punch",
+          "kind": "单点",
+          "held": [],
+          "pulsed": [
+            "Y"
+          ]
+        },
+        {
+          "id": 7,
+          "name": "heavy_punch",
+          "kind": "单点",
+          "held": [],
+          "pulsed": [
+            "X"
+          ]
+        },
+        {
+          "id": 8,
+          "name": "light_kick",
+          "kind": "单点",
+          "held": [],
+          "pulsed": [
+            "B"
+          ]
+        },
+        {
+          "id": 9,
+          "name": "medium_kick",
+          "kind": "单点",
+          "held": [],
+          "pulsed": [
+            "C"
+          ]
+        },
+        {
+          "id": 10,
+          "name": "heavy_kick",
+          "kind": "单点",
+          "held": [],
+          "pulsed": [
+            "Z"
+          ]
+        },
+        {
+          "id": 11,
+          "name": "move_left + jump",
+          "kind": "持续＋单点",
+          "held": [
+            "LEFT"
+          ],
+          "pulsed": [
+            "UP"
+          ]
+        },
+        {
+          "id": 12,
+          "name": "move_right + jump",
+          "kind": "持续＋单点",
+          "held": [
+            "RIGHT"
+          ],
+          "pulsed": [
+            "UP"
+          ]
+        },
+        {
+          "id": 13,
+          "name": "move_left + light_punch",
+          "kind": "持续＋单点",
+          "held": [
+            "LEFT"
+          ],
+          "pulsed": [
+            "A"
+          ]
+        },
+        {
+          "id": 19,
+          "name": "move_right + light_punch",
+          "kind": "持续＋单点",
+          "held": [
+            "RIGHT"
+          ],
+          "pulsed": [
+            "A"
+          ]
+        },
+        {
+          "id": 27,
+          "name": "crouch + heavy_punch",
+          "kind": "持续＋单点",
+          "held": [
+            "DOWN"
+          ],
+          "pulsed": [
+            "X"
+          ]
+        },
+        {
+          "id": 28,
+          "name": "crouch + light_kick",
+          "kind": "持续＋单点",
+          "held": [
+            "DOWN"
+          ],
+          "pulsed": [
+            "B"
+          ]
+        },
+        {
+          "id": 30,
+          "name": "crouch + heavy_kick",
+          "kind": "持续＋单点",
+          "held": [
+            "DOWN"
+          ],
+          "pulsed": [
+            "Z"
+          ]
+        },
+        {
+          "id": 31,
+          "name": "move_left + crouch",
+          "kind": "持续",
+          "held": [
+            "DOWN",
+            "LEFT"
+          ],
+          "pulsed": []
+        },
+        {
+          "id": 32,
+          "name": "move_right + crouch",
+          "kind": "持续",
+          "held": [
+            "DOWN",
+            "RIGHT"
+          ],
+          "pulsed": []
+        }
+      ]
+    },
+    "npc": {
+      "version": "sf3_v2_npc18_block12_v1",
+      "id_policy": "Independent NPC ID namespace 0..17; never interpret these IDs using player space.",
+      "actions": [
+        {
+          "id": 0,
+          "name": "no_op",
+          "kind": "持续",
+          "held": [],
+          "pulsed": []
+        },
+        {
+          "id": 1,
+          "name": "move_left",
+          "kind": "持续",
+          "held": [
+            "LEFT"
+          ],
+          "pulsed": []
+        },
+        {
+          "id": 2,
+          "name": "move_right",
+          "kind": "持续",
+          "held": [
+            "RIGHT"
+          ],
+          "pulsed": []
+        },
+        {
+          "id": 3,
+          "name": "jump",
+          "kind": "单点",
+          "held": [],
+          "pulsed": [
+            "UP"
+          ]
+        },
+        {
+          "id": 4,
+          "name": "crouch_guard_left",
+          "kind": "持续",
+          "held": [
+            "DOWN",
+            "LEFT"
+          ],
+          "pulsed": []
+        },
+        {
+          "id": 5,
+          "name": "crouch_guard_right",
+          "kind": "持续",
+          "held": [
+            "DOWN",
+            "RIGHT"
+          ],
+          "pulsed": []
+        },
+        {
+          "id": 6,
+          "name": "parry_left",
+          "kind": "单点",
+          "held": [],
+          "pulsed": [
+            "LEFT"
+          ]
+        },
+        {
+          "id": 7,
+          "name": "parry_right",
+          "kind": "单点",
+          "held": [],
+          "pulsed": [
+            "RIGHT"
+          ]
+        },
+        {
+          "id": 8,
+          "name": "light_punch",
+          "kind": "单点",
+          "held": [],
+          "pulsed": [
+            "A"
+          ]
+        },
+        {
+          "id": 9,
+          "name": "medium_punch",
+          "kind": "单点",
+          "held": [],
+          "pulsed": [
+            "Y"
+          ]
+        },
+        {
+          "id": 10,
+          "name": "heavy_kick",
+          "kind": "单点",
+          "held": [],
+          "pulsed": [
+            "Z"
+          ]
+        },
+        {
+          "id": 11,
+          "name": "crouch_light_punch",
+          "kind": "持续＋单点",
+          "held": [
+            "DOWN"
+          ],
+          "pulsed": [
+            "A"
+          ]
+        },
+        {
+          "id": 12,
+          "name": "throw_left_medium_punch",
+          "kind": "持续＋单点",
+          "held": [
+            "LEFT"
+          ],
+          "pulsed": [
+            "Y"
+          ]
+        },
+        {
+          "id": 13,
+          "name": "throw_right_medium_punch",
+          "kind": "持续＋单点",
+          "held": [
+            "RIGHT"
+          ],
+          "pulsed": [
+            "Y"
+          ]
+        },
+        {
+          "id": 14,
+          "name": "throw_left_heavy_punch",
+          "kind": "持续＋单点",
+          "held": [
+            "LEFT"
+          ],
+          "pulsed": [
+            "X"
+          ]
+        },
+        {
+          "id": 15,
+          "name": "throw_right_heavy_punch",
+          "kind": "持续＋单点",
+          "held": [
+            "RIGHT"
+          ],
+          "pulsed": [
+            "X"
+          ]
+        },
+        {
+          "id": 16,
+          "name": "throw_left_medium_kick",
+          "kind": "持续＋单点",
+          "held": [
+            "LEFT"
+          ],
+          "pulsed": [
+            "C"
+          ]
+        },
+        {
+          "id": 17,
+          "name": "throw_right_medium_kick",
+          "kind": "持续＋单点",
+          "held": [
+            "RIGHT"
+          ],
+          "pulsed": [
+            "C"
+          ]
+        }
+      ]
+    }
+  },
+  "npc_rule_candidates_status": "initial candidates to qualify, not successful new recipes",
+  "npc_rule_candidates": {
+    "R01": {
+      "allowed_ids": [
+        0,
+        1,
+        2
+      ],
+      "behavior": "toward target until close, release at next boundary"
+    },
+    "R02": {
+      "allowed_ids": [
+        0,
+        1,
+        2
+      ],
+      "behavior": "away until safe distance, release at next boundary"
+    },
+    "R03": {
+      "allowed_common_ids": [
+        0,
+        1,
+        2
+      ],
+      "attack_id_by_character": {
+        "alex": 10,
+        "dudley": 10,
+        "ibuki": 10,
+        "ken": 10,
+        "oro": 10,
+        "elena": 9,
+        "necro": 9,
+        "ryu": 9,
+        "yang": 9,
+        "yun": 8,
+        "sean": 11
+      },
+      "behavior": "punish the same bound attack recovery; movement and attack occupy separate blocks"
+    },
+    "R04": {
+      "allowed_ids": [
+        0,
+        3
+      ],
+      "behavior": "jump to avoid bound projectile"
+    },
+    "R05": {
+      "allowed_ids": [
+        0,
+        1,
+        2,
+        8
+      ],
+      "behavior": "after observed recovery, approach if needed and use light punch"
+    },
+    "R06": {
+      "allowed_ids": [
+        0,
+        1,
+        2,
+        4,
+        5
+      ],
+      "behavior": "standing guard uses held away; low guard uses held DOWN+away; require real block of bound attack"
+    },
+    "R07": {
+      "allowed_ids": [
+        0,
+        8
+      ],
+      "behavior": "light-punch anti-air; qualify character-specific distance and timing"
+    },
+    "R08": {
+      "allowed_ids": [
+        0,
+        6,
+        7
+      ],
+      "behavior": "3-tick toward parry pulse starting only at block boundary; require real parry"
+    },
+    "R09": {
+      "allowed_common_ids": [
+        0
+      ],
+      "throw_strength_by_character": {
+        "alex": "heavy_punch",
+        "ryu": "medium_punch",
+        "yun": "medium_punch",
+        "dudley": "heavy_punch",
+        "necro": "medium_kick",
+        "ibuki": "medium_punch",
+        "elena": "heavy_punch",
+        "oro": "medium_kick",
+        "yang": "medium_punch",
+        "ken": "medium_punch",
+        "sean": "medium_punch"
+      },
+      "direction": "away from target, resolved at decision boundary",
+      "throw_id_by_direction_and_strength": {
+        "LEFT": {
+          "medium_punch": 12,
+          "heavy_punch": 14,
+          "medium_kick": 16
+        },
+        "RIGHT": {
+          "medium_punch": 13,
+          "heavy_punch": 15,
+          "medium_kick": 17
+        }
+      },
+      "behavior": "execute only after genuine range-entry trigger and still valid at selected boundary; require capture and damage"
+    },
+    "R10": {
+      "allowed_ids": [
+        0
+      ]
+    }
+  }
+}

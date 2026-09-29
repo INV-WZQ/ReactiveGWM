@@ -1,307 +1,192 @@
-# ReactiveGWM 训练说明
+# ReactiveGWM v2 Training
 
-本目录包含普通双向训练（bidirectional training）和 Causal Forcing 三阶段训练。
+This release trains the HNM and Street Fighter III: New Generation (SF3) main
+models. The shared implementation is in `src/selective_agency/`; inference uses
+the same model and conditioning code. The v1 bidirectional and Causal Forcing
+workflows remain on the [v1 branch](https://github.com/INV-WZQ/ReactiveGWM/tree/v1).
 
-## 依赖
+## Install
 
-训练代码继续依赖本仓库同级的 `DiffSynth-Studio/diffsynth`。建议在独立环境中安装：
-
-```bash
-pip install -r ReactiveGWM_Code/requirements.txt
-pip install -r ReactiveGWM_Code/training/requirements.txt
-pip install -e DiffSynth-Studio
-```
-
-如果不执行 editable install，也可以通过 `PYTHONPATH` 使用本地源码：
+Run commands from the repository root. Python 3.12 and a CUDA GPU are recommended.
 
 ```bash
-export PYTHONPATH=/path/to/ReactiveGWM/DiffSynth-Studio:/path/to/ReactiveGWM:${PYTHONPATH}
+python -m venv .venv
+source .venv/bin/activate
+pip install -e .
+python training/train.py --help
+python training/prepare_cache.py --help
 ```
 
-## 验证入口
+No separate DiffSynth checkout or directory named `ReactiveGWM_Code` is required.
+The requirements pin the reference DiffSynth/PyTorch versions; `torchaudio` is
+included because DiffSynth imports its data operators at startup.
+
+## Prepare the released Hugging Face data
 
 ```bash
-python -m compileall ReactiveGWM_Code/training/data ReactiveGWM_Code/training/bidirectional
-python -m ReactiveGWM_Code.training.bidirectional.train --help
-python -m ReactiveGWM_Code.training.bidirectional.precompute_cache --help
-python -m ReactiveGWM_Code.training.causal_forcing.train --help
+# Inspect archive sizes before downloading. By default, select two samples per split.
+python scripts/prepare_hf_dataset.py --game hnm --split train val \
+  --output data/hnm-smoke --dry-run
+python scripts/prepare_hf_dataset.py --game hnm --split train val \
+  --output data/hnm-smoke
+
+# Full training/validation subset; this downloads hundreds of GB.
+python scripts/prepare_hf_dataset.py --game hnm --split train val \
+  --all --output data/hnm
+python scripts/prepare_hf_dataset.py --game sf3 --split train val \
+  --all --output data/sf3
 ```
 
-也支持从 `ReactiveGWM_Code/` 目录内直接运行脚本：
+Use `--sample-id ID ...` to select exact IDs, `--revision COMMIT` to pin the
+release, or `--local-repo DIR` for already downloaded HF files. `validation` is
+accepted as an alias for `val`. The output contains `samples.csv`, extracted
+`assets/`, downloaded archives in `downloads/`, and the resolved revision and
+archive inventory in `source.json`. Existing sample CSVs are not overwritten.
+
+HF's `sample_index_*.csv` describes archive members; it is not itself a training
+CSV. The helper preserves sample IDs, split membership, role/mask order and the
+released control/text tables. It does not apply a second historical filter.
+
+| Released subset | Train | Val | Test |
+|---|---:|---:|---:|
+| HNM | 20,000 | 187 | 192 |
+| SF3 | 20,000 | 200 | 200 |
+
+HNM's published splits omit the extra perfect-block strategy. The paper's table
+lists 200 validation and 200 test clips; these commands use the current HF release.
+Both games use 101 frames at 20 FPS and 832 x 480 resolution. There are 25 action
+intervals, each aligned to four future frames, plus a clean first-frame anchor.
+
+Train/val VAE and T5 caches are reused. Test has no VAE cache; add `--include-video`
+if you intend to encode its complete target video. Ordinary inference only needs
+its initial image, masks and controls, and encodes the first frame on demand.
+
+## Train from Wan2.2
+
+Download the three base DiT shards, or point `--base` to an existing copy:
 
 ```bash
-python training/bidirectional/train.py --help
-python training/bidirectional/precompute_cache.py --help
-python training/causal_forcing/train.py --help
+hf download Wan-AI/Wan2.2-TI2V-5B \
+  --include 'diffusion_pytorch_model*.safetensors' --local-dir checkpoints/base
+
+python training/train.py --config training/configs/hnm.yaml \
+  --data data/hnm/samples.csv --base checkpoints/base \
+  --gpus 0,1,2,3,4,5,6,7 --output outputs/hnm
 ```
 
-## 普通双向训练
+For SF3, use `training/configs/sf3.yaml` and `data/sf3/samples.csv`. The internal
+checkpoint game identifier remains `sf` to preserve compatibility with released
+weights. All parameters of the DiT and role/control modules are trained except
+the original frozen cross-attention output biases; VAE and T5 remain frozen.
 
-入口：
+## Fine-tune a released main model
 
 ```bash
-python -m ReactiveGWM_Code.training.bidirectional.train
+python training/train.py --config training/configs/hnm.yaml \
+  --data data/hnm/samples.csv \
+  --init-checkpoint INV-WZQ/ReactiveGWM-v2-Models --model-subfolder HNM/main \
+  --gpus 0 --max-steps 2000 --output outputs/hnm-finetune
 ```
 
-最小命令形态：
+`--init-checkpoint` also accepts a local model directory. For SF3, select
+`SF3/main` and its training config. `--revision` and `--hf-cache-dir` control HF
+initialization. HF exports contain model weights and text assets, **not optimizer
+or sampler state**: initialization starts a new optimization run at step zero.
 
-```bash
-accelerate launch --num_processes 8 --multi_gpu \
-  -m ReactiveGWM_Code.training.bidirectional.train \
-  --game sf2 \
-  --dataset_base_path <dataset-root> \
-  --dataset_metadata_path <metadata.csv> \
-  --model_paths '<model-paths-json>' \
-  --output_path <output-dir> \
-  --trainable_models dit \
-  --learning_rate 5e-5 \
-  --max_train_steps 30000 \
-  --save_steps 1000
-```
+## Steps and batch size
 
-`--game` 目前支持：
+Both main recipes default to **20,000 optimizer updates** and **effective batch 8**.
+These defaults follow the paper; the supplied historical code used 28K/40K
+recipes. This change does not imply the released weights were retrained at 20K.
 
-- `sf2`
-- `sf3`
-
-游戏 profile 会决定默认视频尺寸、按钮 schema、固定 prompt fallback 等数据处理行为。
-
-### 训练步数和超参数
-
-训练入口复用 DiffSynth 的通用训练参数，并额外支持 `--max_train_steps` 精确限制训练步数。建议显式传入训练超参数，不依赖默认值：
-
-| 参数 | 作用 | 推荐值 / 说明 |
-|---|---|---|
-| `--learning_rate` | AdamW 学习率 | Full / scoped DiT: `5e-5`；LoRA: `1e-4` |
-| `--weight_decay` | AdamW weight decay | `0.01` |
-| `--num_epochs` | 最大 epoch 数 | 不使用 `--max_train_steps` 时控制总训练轮数；常用 `1000` |
-| `--max_train_steps` | 精确训练多少 step 后停止 | 推荐按目标 checkpoint step 显式设置，例如 `30000` |
-| `--save_steps` | 每多少 step 保存一次 checkpoint | `1000` |
-| `--gradient_accumulation_steps` | 梯度累积步数 | Full DiT: `1`；scoped / LoRA: `2` |
-| `--dataset_repeat` | 每个 epoch 重复数据集次数 | `1` |
-| `--dataset_num_workers` | DataLoader worker 数 | `4` |
-| `--height --width --num_frames` | 视频尺寸和帧数 | SF2: `480 608 101`；SF3: `480 832 101` |
-| `--use_gradient_checkpointing` | 降低显存占用 | 推荐开启 |
-| `--prompt_dropout_prob` | prompt CFG-style dropout | `0.1` |
-| `--action_dropout_prob` | action dropout | `0.0` |
-
-这里的 step 与 `--save_steps`、`--max_train_steps`、checkpoint 文件名 `step-N.safetensors` 使用同一计数：prepared dataloader 每迭代一次计 1 step。当前 DataLoader batch size 固定为 1；在多卡训练时：
+| Argument | Default | Meaning |
+|---|---:|---|
+| `--max-steps` | 20000 | Total optimizer updates, including restored progress |
+| `--effective-batch-size` | 8 | Target global batch when accumulation is automatic |
+| `--batch-size` | 1 | Samples per GPU per microbatch |
+| `--gradient-accumulation-steps` | auto | Explicit value overrides the target effective batch |
+| `--learning-rate` | 5e-5 | AdamW learning rate |
+| `--save-every` | 1000 | Save complete state every N updates; 0 saves only at the end |
+| `--validate-every` | 1000 | Validation interval; 0 disables validation |
+| `--num-workers` | 4 | DataLoader workers per process |
+| `--precision` | bf16 | `bf16` or `fp32` |
+| `--seed` | 20260808 | Initialization, sampling and role-permutation seed |
 
 ```text
-steps_per_epoch ~= ceil(num_samples * dataset_repeat / num_processes)
-total_steps     = num_epochs * steps_per_epoch              # without --max_train_steps
-total_steps     = min(num_epochs * steps_per_epoch, N)       # with --max_train_steps N
-effective_batch = num_processes * gradient_accumulation_steps
+effective batch = world size * batch size * gradient accumulation steps
 ```
 
-`--gradient_accumulation_steps` 改变等效 batch size 和 optimizer 更新频率，但不改变 `save_steps` / `max_train_steps` 的计数单位。若没有设置 `--max_train_steps`，训练会按 `--num_epochs` 跑完；若设置了 `--max_train_steps`，达到该 step 后会停止并保存最终 checkpoint。
+Automatic accumulation is 8 on one GPU, 4 on two GPUs, and 1 on eight GPUs with
+microbatch 1. The target must divide exactly; the program rejects incompatible
+values. Explicit accumulation allows any positive resulting batch size. If
+`--effective-batch-size` is supplied without explicit accumulation, accumulation
+is recalculated even when the YAML contains a previous explicit value. Command-line
+values override YAML values. The resolved settings are printed at startup.
 
-推荐从下面几组配置开始，再按数据规模和显存调整。
+`--gpus` launches one process per selected GPU; external `torchrun` is also
+supported. `--dry-run` prints the resolved recipe without loading model weights.
+There is no implicit video resize, crop or temporal resampling.
 
-### 全量 DiT 微调
+## Save and resume
 
 ```bash
-accelerate launch --num_processes 8 --multi_gpu \
-  -m ReactiveGWM_Code.training.bidirectional.train \
-  --game sf2 \
-  --dataset_base_path <dataset-root> \
-  --dataset_metadata_path <metadata.csv> \
-  --model_paths '<model-paths-json>' \
-  --output_path <output-dir> \
-  --trainable_models dit \
-  --learning_rate 5e-5 \
-  --max_train_steps 30000 \
-  --save_steps 1000 \
-  --gradient_accumulation_steps 1 \
-  --weight_decay 0.01 \
-  --dataset_repeat 1 \
-  --dataset_num_workers 4 \
-  --use_gradient_checkpointing \
-  --prompt_dropout_prob 0.1 \
-  --action_dropout_prob 0.0
+python training/train.py --config training/configs/hnm.yaml \
+  --data data/hnm/samples.csv --resume outputs/hnm/checkpoint-1000 \
+  --gpus 0,1,2,3,4,5,6,7 --max-steps 20000 --output outputs/hnm-resumed
 ```
 
-### 指定模块微调
+Complete checkpoints include weights, optimizer, LR scheduler, progress, sampler,
+RNG, configuration and text tables. Exact resume requires the same data/order,
+precision, world size and batch settings. `--resume-mode reshard` allows changing
+world size/batch settings with the same training records; it reseeds RNG and reports
+replayed samples. `--max-steps` is the total target, not additional updates after
+resume. New output directories avoid checkpoint-name collisions. Validation is
+automatically disabled if the CSV has no `val` split.
 
-只训练名称包含某些子串的 DiT 参数：
+## Custom data and cache preparation
+
+Each CSV row has the following columns. Paths are relative to the CSV; absolute
+paths are also accepted.
+
+| Column | Value |
+|---|---|
+| `sample_id`, `split` | Unique ID within the split; `train`, `val`, or `test` |
+| `video` | Target RGB video, required if full video latents are absent |
+| `first_frame` | Initial image; optional when preparing from the target video |
+| `masks` | JSON list of mask paths in subject order |
+| `controls` | JSON with `subjects`, each supplying `actions` or `prompt` |
+| `latents` | Optional existing VAE safetensors |
+| `text_cache` | Optional shared T5 safetensors, accompanied by its JSON metadata |
+
+See [inference examples](../inference/examples/README.md) for controls. For a
+101-frame video, each external subject supplies exactly 25 action names. NPC rules
+are fixed within a rollout. Raw engine IDs and future NPC execution records are
+not used as model inputs. An actually invisible subject may use `visible: false`
+with an all-zero mask.
 
 ```bash
-accelerate launch --num_processes 8 --multi_gpu \
-  -m ReactiveGWM_Code.training.bidirectional.train \
-  --game sf2 \
-  --dataset_base_path <dataset-root> \
-  --dataset_metadata_path <metadata.csv> \
-  --model_paths '<model-paths-json>' \
-  --output_path <output-dir> \
-  --trainable_models dit \
-  --trainable_filter cross_attn \
-  --learning_rate 5e-5 \
-  --max_train_steps 30000 \
-  --save_steps 1000 \
-  --gradient_accumulation_steps 2 \
-  --weight_decay 0.01 \
-  --dataset_repeat 1 \
-  --dataset_num_workers 4 \
-  --use_gradient_checkpointing \
-  --prompt_dropout_prob 0.1 \
-  --action_dropout_prob 0.0
+python training/prepare_cache.py --config training/configs/hnm.yaml \
+  --data /path/to/custom.csv --cache-root data/custom-prepared \
+  --vae checkpoints/base/Wan2.2_VAE.pth \
+  --text-encoder checkpoints/base/models_t5_umt5-xxl-enc-bf16.pth \
+  --tokenizer /path/to/umt5-tokenizer --gpus 0
 ```
 
-排除名称包含某些子串的 DiT 参数：
+Existing caches are reused; `--encode-text` explicitly rebuilds the text table.
+`--no-copy-assets` references existing latent/mask files. Custom geometry is set
+in YAML: width/height must be multiples of 32 and frames must be `4*T+1`.
+
+## Validation
 
 ```bash
-accelerate launch --num_processes 8 --multi_gpu \
-  -m ReactiveGWM_Code.training.bidirectional.train \
-  --game sf2 \
-  --dataset_base_path <dataset-root> \
-  --dataset_metadata_path <metadata.csv> \
-  --model_paths '<model-paths-json>' \
-  --output_path <output-dir> \
-  --trainable_models dit \
-  --trainable_filter_exclude cross_attn \
-  --learning_rate 5e-5 \
-  --max_train_steps 30000 \
-  --save_steps 1000 \
-  --gradient_accumulation_steps 2 \
-  --weight_decay 0.01 \
-  --dataset_repeat 1 \
-  --dataset_num_workers 4 \
-  --use_gradient_checkpointing \
-  --prompt_dropout_prob 0.1 \
-  --action_dropout_prob 0.0
+python tests/test_core.py
+TRAINING_GAME=sf python tests/test_core.py
+python tests/test_csv.py
+TRAINING_GAME=sf python tests/test_csv.py
+python tests/test_release.py
+python tests/check_training.py --game hnm
+python tests/check_training.py --game sf
 ```
 
-### LoRA 微调
-
-```bash
-accelerate launch --num_processes 8 --multi_gpu \
-  -m ReactiveGWM_Code.training.bidirectional.train \
-  --game sf2 \
-  --dataset_base_path <dataset-root> \
-  --dataset_metadata_path <metadata.csv> \
-  --model_paths '<model-paths-json>' \
-  --output_path <output-dir> \
-  --lora_base_model dit \
-  --lora_target_modules q,k,v,o \
-  --lora_rank 32 \
-  --learning_rate 1e-4 \
-  --max_train_steps 30000 \
-  --save_steps 1000 \
-  --gradient_accumulation_steps 2 \
-  --weight_decay 0.01 \
-  --dataset_repeat 1 \
-  --dataset_num_workers 4 \
-  --use_gradient_checkpointing \
-  --prompt_dropout_prob 0.1 \
-  --action_dropout_prob 0.0
-```
-
-## Cache 预计算
-
-入口：
-
-```bash
-python -m ReactiveGWM_Code.training.bidirectional.precompute_cache
-```
-
-示例：
-
-```bash
-python -m ReactiveGWM_Code.training.bidirectional.precompute_cache \
-  --game sf2 \
-  --metadata_path <metadata.csv> \
-  --dataset_base_path <dataset-root> \
-  --cache_root <cache-root> \
-  --model_paths '<model-paths-json>' \
-  --tokenizer_path <umt5-dir> \
-  --height 480 \
-  --width 608 \
-  --num_frames 101
-```
-
-预计算完成后，训练时加上：
-
-```bash
---use_cached_dataset --cache_root <cache-root>
-```
-
-`precompute_cache.py` 和 `bidirectional/cached_dataset.py` 的 cache key 逻辑必须保持一致；修改其中一个时需要同步检查另一个。
-
-## Causal Forcing 三阶段训练
-
-入口：
-
-```bash
-python -m ReactiveGWM_Code.training.causal_forcing.train
-```
-
-配置文件位于 `training/causal_forcing/configs/`。`default.yaml` 提供共享超参，stage yaml 只覆盖阶段差异。常用路径可以通过环境变量覆盖：
-
-```bash
-BASE_CKPT=<base-or-bidirectional-ckpt>
-WAN_BASE_DIR=<Wan2.2-TI2V-5B-dir>
-TOKENIZER_DIR=<Wan2.1-T2V-1.3B/google/umt5-xxl-dir>
-DATA_ROOT=<dataset-root>
-METADATA_PATH=<metadata.csv>
-OUT=<output-dir>
-STUDENT_INIT=<previous-stage-ckpt>
-TEACHER_CKPT=<stage1-teacher-ckpt>
-```
-
-Stage 1 AR-TF：
-
-```bash
-BASE_CKPT=<base-or-bidirectional-ckpt> \
-WAN_BASE_DIR=<Wan2.2-TI2V-5B-dir> \
-TOKENIZER_DIR=<Wan2.1-T2V-1.3B/google/umt5-xxl-dir> \
-DATA_ROOT=<dataset-root> \
-OUT=<output-stage1> \
-accelerate launch --num_processes 8 --multi_gpu \
-  -m ReactiveGWM_Code.training.causal_forcing.train \
-  --stage ar_tf \
-  --config ReactiveGWM_Code/training/causal_forcing/configs/stage1_ar.yaml
-```
-
-Stage 2 CD：
-
-```bash
-WAN_BASE_DIR=<Wan2.2-TI2V-5B-dir> \
-TOKENIZER_DIR=<Wan2.1-T2V-1.3B/google/umt5-xxl-dir> \
-STUDENT_INIT=<stage1-step.safetensors> \
-DATA_ROOT=<dataset-root> \
-OUT=<output-stage2> \
-accelerate launch --num_processes 8 --multi_gpu \
-  -m ReactiveGWM_Code.training.causal_forcing.train \
-  --stage cd \
-  --config ReactiveGWM_Code/training/causal_forcing/configs/stage2_cd.yaml
-```
-
-Stage 3 DMD：
-
-```bash
-BASE_CKPT=<base-or-bidirectional-ckpt> \
-WAN_BASE_DIR=<Wan2.2-TI2V-5B-dir> \
-TOKENIZER_DIR=<Wan2.1-T2V-1.3B/google/umt5-xxl-dir> \
-STUDENT_INIT=<stage2-step.safetensors> \
-DATA_ROOT=<dataset-root> \
-OUT=<output-stage3> \
-accelerate launch --num_processes 8 --multi_gpu \
-  -m ReactiveGWM_Code.training.causal_forcing.train \
-  --stage dmd \
-  --config ReactiveGWM_Code/training/causal_forcing/configs/stage3_dmd.yaml
-```
-
-Causal Forcing 训练只保存训练 checkpoint、EMA / critic 导出和 `accelerator.save_state` resume state；不会在训练保存点自动启动推理采样。
-
-## Resume
-
-普通双向训练入口支持两类恢复方式：
-
-- `--resume_from_ckpt <step.safetensors>`：加载已保存的 DiT 权重，不恢复 optimizer / LR / RNG / dataloader 状态。
-- `--save_full_state` + `--resume_state <state-dir>`：使用 `accelerator.save_state/load_state` 恢复完整训练状态。
-
-二者互斥。
-
-当 `--resume_state` 指向 `state-N` 目录时，训练 step 计数会从 `N` 继续；因此 `--max_train_steps 30000` 表示训练到全局 step 30000，而不是在 resume 后再额外训练 30000 step。
-
-Causal Forcing 的三个 stage 都支持 `--resume_state <state-N>`；Stage 2/3 的 EMA state 会随 `state-N` 目录额外保存并在 resume 时手动恢复。
+The release's actual validation scope and results are recorded in
+[VERIFICATION.md](../VERIFICATION.md).

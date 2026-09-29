@@ -1,87 +1,69 @@
-"""End-to-end inference entry-point. Run from the repo root:
-
-    cd /path/to/ReactiveGWM_Code
-    python inference/inference.py \\
-        --variant sf3 --ckpt <path> --image first.png --actions actions.parquet --out out.mp4
-
-Override the text prompt with --prompt (positive) and/or --negative_prompt;
-both default to the variant's training-time prompt / the shared Chinese
-neg-prompt baked into ``inference/constants.py``.
-"""
+"""Generate from a prepared HF sample or a first frame, masks and controls JSON."""
 import argparse
-import sys
 from pathlib import Path
+import sys
 
-# Bootstrap: add the repo's parent directory to sys.path so we can do
-# `from ReactiveGWM_Code.inference import ...` no matter where Python was
-# invoked. Lets `python inference/inference.py ...` work directly without `-m`.
-_PKG_DIR = Path(__file__).resolve().parent           # .../ReactiveGWM_Code/inference
-_REPO_ROOT = _PKG_DIR.parent                         # .../ReactiveGWM_Code
-_PARENT = _REPO_ROOT.parent                          # .../ReactiveGWM
-if str(_PARENT) not in sys.path:
-    sys.path.insert(0, str(_PARENT))
-
-import torch
-from PIL import Image
-
-from ReactiveGWM_Code.inference import NEG_PROMPT, SFPipeline, VARIANT_DEFAULTS
-from ReactiveGWM_Code.inference.utils import save_mp4
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 
 def main():
-    p = argparse.ArgumentParser()
-    p.add_argument("--variant", choices=["sf2", "sf3"], required=True)
-    p.add_argument("--ckpt", required=True)
-    p.add_argument("--image", required=True, help="First-frame image (png/jpg).")
-    p.add_argument("--actions", required=True, help="Path to actions parquet.")
-    p.add_argument("--out", default="out.mp4")
-    p.add_argument("--base_model", default="/opt/dlami/nvme/zeqingwang/models/base_model")
-    p.add_argument("--num_frames", type=int, default=101)
-    p.add_argument("--steps", type=int, default=30)
-    p.add_argument("--cfg", type=float, default=5.0)
-    p.add_argument("--action_cfg", type=float, default=1.0)
-    p.add_argument("--height", type=int, default=None)
-    p.add_argument("--width", type=int, default=None)
-    p.add_argument("--seed", type=int, default=2)
-    p.add_argument(
-        "--prompt", type=str, default=None,
-        help=f"Positive prompt. Default = variant default: "
-             f"sf2={VARIANT_DEFAULTS['sf2']['prompt']!r}, "
-             f"sf3={VARIANT_DEFAULTS['sf3']['prompt']!r}.",
-    )
-    p.add_argument(
-        "--negative_prompt", type=str, default=NEG_PROMPT,
-        help="Negative prompt for CFG. Default = the shared Chinese neg-prompt "
-             "from ReactiveGWM_Code.inference.constants.NEG_PROMPT.",
-    )
-    args = p.parse_args()
+    from selective_agency.runtime.cli import configure_devices, torch_device
 
-    pipe = SFPipeline.from_pretrained(
-        base_model_dir=args.base_model,
-        checkpoint_path=args.ckpt,
-        variant=args.variant,
-        torch_dtype=torch.bfloat16,
-    ).to("cuda")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--checkpoint", required=True, help="local directory or HF repo ID")
+    parser.add_argument("--model-subfolder", choices=("HNM/main", "SF3/main"))
+    parser.add_argument("--revision")
+    parser.add_argument("--hf-cache-dir")
+    parser.add_argument("--config", help="defaults to the checkpoint config.yaml")
+    source = parser.add_mutually_exclusive_group(required=True)
+    source.add_argument("--data", help="prepared samples.csv")
+    source.add_argument("--image", help="custom first-frame image")
+    parser.add_argument("--masks", nargs="+", help="one initial mask per subject, in controls order")
+    parser.add_argument("--controls", help="controls JSON; replaces sample controls when --data is used")
+    parser.add_argument("--split", choices=("train", "val", "test"), default="val")
+    selection = parser.add_mutually_exclusive_group()
+    selection.add_argument("--sample-id")
+    selection.add_argument("--indices", type=int, nargs="+", default=[0])
+    parser.add_argument("--output", required=True)
+    parser.add_argument("--vae")
+    parser.add_argument("--text-cache")
+    parser.add_argument("--text-encoder")
+    parser.add_argument("--tokenizer")
+    parser.add_argument("--device", choices=("auto", "cpu", "cuda"), default="auto")
+    parser.add_argument("--gpus")
+    parser.add_argument("--precision", choices=("bf16", "fp32"))
+    parser.add_argument("--seed", type=int, default=20260808)
+    parser.add_argument("--steps", type=int)
+    parser.add_argument("--sigma-shift", type=float)
+    parser.add_argument("--latent-only", action="store_true")
+    args = parser.parse_args()
+    if args.image and (not args.masks or not args.controls):
+        parser.error("--image requires --masks and --controls")
+    if args.data and args.masks:
+        parser.error("--masks is used with --image; CSV already specifies masks")
+    if args.gpus and len(args.gpus.split(",")) != 1:
+        parser.error("inference uses one GPU; select a single index with --gpus")
+    if len(set(args.indices)) != len(args.indices):
+        parser.error("choose distinct indices")
+    configure_devices(args)
+    from selective_agency.runtime.pipeline import ReactiveGWMPipeline
 
-    used_prompt = args.prompt if args.prompt is not None else VARIANT_DEFAULTS[args.variant]["prompt"]
-    print(f"[inference] prompt           = {used_prompt!r}")
-    print(f"[inference] negative_prompt  = {args.negative_prompt[:60]!r}...")
-
-    out = pipe(
-        image=Image.open(args.image),
-        actions_parquet=args.actions,
-        prompt=args.prompt,                    # None → pipeline picks variant default
-        negative_prompt=args.negative_prompt,
-        num_frames=args.num_frames,
-        num_inference_steps=args.steps,
-        cfg_scale=args.cfg,
-        action_cfg_scale=args.action_cfg,
-        height=args.height,
-        width=args.width,
-        seed=args.seed,
+    pipe = ReactiveGWMPipeline.from_pretrained(
+        args.checkpoint, subfolder=args.model_subfolder, revision=args.revision, cache_dir=args.hf_cache_dir,
+        config=args.config, device=torch_device(args.device), precision=args.precision,
+        vae=args.vae, text_encoder=args.text_encoder, tokenizer=args.tokenizer,
     )
-    save_mp4(out.frames[0], args.out, fps=20)
-    print(f"Saved → {Path(args.out).resolve()}")
+    common = dict(seed=args.seed, steps=args.steps, sigma_shift=args.sigma_shift,
+                  latent_only=args.latent_only, text_cache=args.text_cache)
+    if args.image:
+        pipe(image=args.image, masks=args.masks, controls=args.controls, output=args.output, **common)
+    else:
+        indices = [0] if args.sample_id else args.indices
+        for index in indices:
+            # Use ordinals rather than sample IDs as filesystem paths.
+            destination = Path(args.output) / f"sample-{index:06d}"
+            pipe.sample_csv(args.data, split=args.split, index=index, sample_id=args.sample_id,
+                            controls=args.controls, output=destination, **common)
 
 
 if __name__ == "__main__":

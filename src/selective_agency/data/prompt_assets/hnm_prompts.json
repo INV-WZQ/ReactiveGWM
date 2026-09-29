@@ -1,0 +1,122 @@
+{
+  "protocol": "hnm-if-then",
+  "entries": [
+    {
+      "rule_id": "H01",
+      "policy_id": "approach_until_close",
+      "trigger": {
+        "clause": "retreat_distance",
+        "text": "The target player moves away from this NPC and increases the distance."
+      },
+      "response": "Move toward the target until close, then release the controls and wait.",
+      "text": "If the target player moves away from this NPC, then move toward that player until close."
+    },
+    {
+      "rule_id": "H02",
+      "policy_id": "retreat_until_safe",
+      "trigger": {
+        "clause": "close_range",
+        "text": "The target player moves toward this NPC and enters close range."
+      },
+      "response": "Move away from the target until reaching a safe distance, then release the controls and wait.",
+      "text": "If the target player moves toward this NPC and enters close range, then move away from that player until at a safe distance."
+    },
+    {
+      "rule_id": "H03",
+      "policy_id": "punch_during_recovery",
+      "trigger": {
+        "clause": "attack_miss",
+        "text": "The target player's attack misses."
+      },
+      "response": "Move toward the target and punch during the target's recovery window, then release the controls and wait.",
+      "text": "If the target player's punch or kick misses, then move toward that player and punch during their recovery."
+    },
+    {
+      "rule_id": "H03",
+      "policy_id": "kick_during_recovery",
+      "trigger": {
+        "clause": "attack_miss",
+        "text": "The target player's attack misses."
+      },
+      "response": "Move toward the target and kick during the target's recovery window, then release the controls and wait.",
+      "text": "If the target player's punch or kick misses, then move toward that player and kick during their recovery."
+    },
+    {
+      "rule_id": "H04",
+      "policy_id": "jump_to_dodge_shuriken",
+      "trigger": {
+        "clause": "projectile_launch",
+        "text": "The target player throws a shuriken."
+      },
+      "response": "Jump to dodge the shuriken, then release the controls and wait.",
+      "text": "If the target player throws a shuriken, then jump to dodge it."
+    },
+    {
+      "rule_id": "H05",
+      "policy_id": "kick_target_as_target_recovers",
+      "trigger": {
+        "clause": "target_hit",
+        "text": "Another external player hits the target player with a punch, kick, or thrown shuriken."
+      },
+      "response": "Move toward the target and kick as the target recovers, then release the controls and wait.",
+      "text": "If another external player hits the target player with a punch, kick, or thrown shuriken, then move toward the target player and kick as they recover."
+    },
+    {
+      "rule_id": "H06",
+      "policy_id": "recover_then_kick_target",
+      "trigger": {
+        "clause": "actor_hit_by_target",
+        "text": "The target player hits this NPC with a punch, kick, or thrown shuriken."
+      },
+      "response": "After recovering, move toward the target and kick once, then release the controls and wait.",
+      "text": "If the target player hits this NPC with a punch, kick, or thrown shuriken, then after this NPC recovers, move toward that player and kick once."
+    },
+    {
+      "rule_id": "H07",
+      "policy_id": "block_by_attack_height",
+      "trigger": {
+        "clause": "target_attack",
+        "text": "The target player attacks this NPC with a punch or kick."
+      },
+      "response": "Block while standing if the attack is high; block while crouching if the attack is low; then release the controls and wait.",
+      "text": "If the target player punches or kicks this NPC, then block standing for high attacks and crouching for low attacks."
+    },
+    {
+      "rule_id": "H08",
+      "policy_id": "punch_airborne_target",
+      "trigger": {
+        "clause": "jump_in",
+        "text": "The target player jumps toward this NPC."
+      },
+      "response": "Punch the target while the target is airborne, then release the controls and wait.",
+      "text": "If the target player jumps toward this NPC, then punch that player while they are airborne."
+    },
+    {
+      "rule_id": "H08",
+      "policy_id": "kick_airborne_target",
+      "trigger": {
+        "clause": "jump_in",
+        "text": "The target player jumps toward this NPC."
+      },
+      "response": "Kick the target while the target is airborne, then release the controls and wait.",
+      "text": "If the target player jumps toward this NPC, then kick that player while they are airborne."
+    },
+    {
+      "rule_id": "H09",
+      "policy_id": "kick_target_during_recovery",
+      "trigger": {
+        "clause": "target_attacks_other",
+        "text": "The target player's punch or kick makes contact with another external player."
+      },
+      "response": "After the trigger, move toward the target and kick once, then release the controls and wait.",
+      "text": "If the target player's punch or kick makes contact with another external player, then move toward the target player and kick once."
+    },
+    {
+      "rule_id": "H10",
+      "policy_id": "no_op",
+      "trigger": null,
+      "response": null,
+      "text": "Keep all controls released throughout the video (no-op)."
+    }
+  ]
+}

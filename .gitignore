@@ -20,3 +20,11 @@ out.mp4
 # Source MOVs for assets/SF{2,3}.gif — kept locally, not in repo
 # (too large for plain git; regenerate GIFs via ffmpeg if/when needed)
 assets/*.mov
+
+# Downloaded models, prepared datasets and local runs
+.venv/
+.runtime/
+/data/
+/checkpoints/
+/outputs/
+*.tar

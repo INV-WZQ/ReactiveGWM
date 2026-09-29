@@ -103,7 +103,7 @@ pipe.sample_csv(
 | `--seed` | 20260808 |
 | `--precision` | Checkpoint precision, normally BF16 |
 | `--gpus` | Select visible physical GPU indices; inference uses one GPU |
-| `--revision` | Pin the HF checkpoint revision; the resolved commit is recorded |
+| `--revision` | HF branch or tag (default: `main`); this readable name is recorded |
 | `--hf-cache-dir` | Override model download cache |
 | `--text-cache` | Explicit replacement T5 table for custom data |
 | `--latent-only` | Skip VAE decoding; raw image inputs still need VAE encoding |

@@ -12,7 +12,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--checkpoint", required=True, help="local directory or HF repo ID")
     parser.add_argument("--model-subfolder", choices=("HNM/main", "SF3/main"))
-    parser.add_argument("--revision")
+    parser.add_argument("--revision", help="HF model branch or tag (default: main)")
     parser.add_argument("--hf-cache-dir")
     parser.add_argument("--config", help="defaults to the checkpoint config.yaml")
     source = parser.add_mutually_exclusive_group(required=True)

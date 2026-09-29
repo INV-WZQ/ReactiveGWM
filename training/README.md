@@ -37,10 +37,11 @@ python scripts/prepare_hf_dataset.py --game sf3 --split train val \
   --all --output data/sf3
 ```
 
-Use `--sample-id ID ...` to select exact IDs, `--revision COMMIT` to pin the
-release, or `--local-repo DIR` for already downloaded HF files. `validation` is
-accepted as an alias for `val`. The output contains `samples.csv`, extracted
-`assets/`, downloaded archives in `downloads/`, and the resolved revision and
+Use `--sample-id ID ...` to select exact IDs, `--revision BRANCH_OR_TAG` to select
+a readable version (default: `main`), or `--local-repo DIR` for already downloaded
+HF files. `validation` is accepted as an alias for `val`. The output contains
+`samples.csv`, extracted
+`assets/`, downloaded archives in `downloads/`, and the branch/tag name and
 archive inventory in `source.json`. Existing sample CSVs are not overwritten.
 
 HF's `sample_index_*.csv` describes archive members; it is not itself a training

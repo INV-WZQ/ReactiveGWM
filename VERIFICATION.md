@@ -7,10 +7,9 @@ tested. Existing server environments, datasets and model files were not modified
 
 ## Inputs
 
-- Model repository: `INV-WZQ/ReactiveGWM-v2-Models`, commit
-  `789c82a247f61a3bbb6eeec911ecd7dbae2f2e2f`; downloaded `HNM/main` and `SF3/main`.
-- Dataset repository: `INV-WZQ/ReactiveGWM-v2-Datasets`, commit
-  `ec39c556be6ce40ffabb26d906d423e2f79a26aa`.
+- Model repository: `INV-WZQ/ReactiveGWM-v2-Models`, as available on 2026-09-29;
+  downloaded `HNM/main` and `SF3/main`.
+- Dataset repository: `INV-WZQ/ReactiveGWM-v2-Datasets`, as available on 2026-09-29.
 - Numerical reference: the supplied `training_2026-09-29.zip`, extracted separately
   from the implementation under test.
 - The existing Wan2.2 VAE, text encoder and tokenizer were used read-only.

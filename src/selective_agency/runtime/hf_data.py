@@ -163,7 +163,7 @@ def main():
     selection.add_argument("--limit", type=int, default=2, help="samples per split (default: 2)")
     selection.add_argument("--all", action="store_true", help="select all rows of requested splits")
     parser.add_argument("--repo-id", default=DATASET_REPO)
-    parser.add_argument("--revision", help="HF dataset revision; resolved to a commit")
+    parser.add_argument("--revision", default="main", help="HF dataset branch or tag (default: main)")
     parser.add_argument("--output", required=True, help="new prepared dataset directory")
     parser.add_argument("--local-repo", help="use an already downloaded HF repository")
     parser.add_argument("--include-video", action="store_true", help="also extract GT RGB videos for cache preparation")
@@ -177,16 +177,14 @@ def main():
         parser.error("output already contains samples.csv; choose a new directory")
     if args.local_repo:
         local = Path(args.local_repo).expanduser().resolve()
-        commit = args.revision
         def fetch(name):
             return member_path(local, name).resolve(strict=True)
     else:
-        from huggingface_hub import HfApi, hf_hub_download
+        from huggingface_hub import hf_hub_download
 
-        commit = HfApi().dataset_info(args.repo_id, revision=args.revision).sha
         def fetch(name):
             return Path(hf_hub_download(
-                args.repo_id, name, repo_type="dataset", revision=commit,
+                args.repo_id, name, repo_type="dataset", revision=args.revision,
                 local_dir=output / "downloads",
             ))
     rows = []
@@ -204,7 +202,7 @@ def main():
     with fetch("volume_manifest.csv").open(newline="", encoding="utf-8") as handle:
         volumes = {r["archive"]: int(r["tar_bytes"]) for r in csv.DictReader(handle)}
     report = {
-        "repo_id": args.repo_id, "revision": commit, "game": args.game,
+        "repo_id": args.repo_id, "revision": args.revision, "game": args.game,
         "samples": len(rows), "archives": {name: volumes[name] for name in sorted(plan)},
         "download_bytes": sum(volumes[name] for name in plan),
     }

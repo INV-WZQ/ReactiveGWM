@@ -13,13 +13,13 @@ def resolve_checkpoint(source, *, subfolder=None, revision=None, cache_dir=None)
         return path.resolve(strict=True), {"source": str(path.resolve())}
     if subfolder not in {"HNM/main", "SF3/main"}:
         raise ValueError("HF checkpoints require --model-subfolder HNM/main or SF3/main")
-    from huggingface_hub import HfApi, snapshot_download
+    from huggingface_hub import snapshot_download
 
-    commit = HfApi().model_info(source, revision=revision).sha
+    revision = revision or "main"
     root = snapshot_download(
-        source, revision=commit, allow_patterns=[f"{subfolder}/*"], cache_dir=cache_dir,
+        source, revision=revision, allow_patterns=[f"{subfolder}/*"], cache_dir=cache_dir,
     )
-    return Path(root) / subfolder, {"repo_id": source, "subfolder": subfolder, "revision": commit}
+    return Path(root) / subfolder, {"repo_id": source, "subfolder": subfolder, "revision": revision}
 
 
 def validate_checkpoint(directory, config, model):

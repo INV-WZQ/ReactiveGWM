@@ -321,7 +321,7 @@ def main(default_config):
     )
     initial.add_argument("--resume", help="restore a complete new or original Accelerate state")
     parser.add_argument("--model-subfolder", help="HNM/main or SF3/main for HF initialization")
-    parser.add_argument("--revision", help="HF model commit or revision")
+    parser.add_argument("--revision", help="HF model branch or tag (default: main)")
     parser.add_argument("--hf-cache-dir")
     initial.add_argument(
         "--random-init",

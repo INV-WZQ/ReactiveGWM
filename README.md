@@ -1,3 +1,13 @@
+# ReactiveGWM project website
+
+- `index.html`: v2 homepage, initially English; the language button toggles Chinese.
+- `v1/index.html`: preserved original page with a version switch and Code pointing to the `v1` branch.
+- Both pages link to the original paper. v2 Code, model and dataset links point to v2 resources.
+- v2 content and media come from the supplied September 2026 ReactiveGWM project page. Full SF3 generation instructions remain verbatim in English; the Chinese UI labels them accordingly.
+- Preview with `python -m http.server 8765 --bind 127.0.0.1`, then open `http://127.0.0.1:8765/` or `/v1/`. No build step is required.
+
+---
+
 # Academic Project Page Template
 This is an academic paper project page template.
 

@@ -1,0 +1,7 @@
+/* Shared version navigation; v1 keeps its original layout. */
+.version-switch { display:inline-flex; align-items:center; gap:3px; padding:3px; border:1px solid #cbd5e1; border-radius:999px; background:rgba(255,255,255,.94); }
+.version-switch a { padding:6px 13px; border-radius:999px; color:#475569; font:600 13px/1.4 "Noto Sans",sans-serif; text-decoration:none; white-space:nowrap; }
+.version-switch a[aria-current="page"] { background:#2563eb; color:#fff; }
+.version-switch a:focus-visible { outline:3px solid #93b4e5; outline-offset:2px; }
+.language-switcher { display:flex; align-items:center; gap:10px; }
+@media(max-width:600px) { .language-switcher { position:static; justify-content:flex-end; padding:12px; } }
